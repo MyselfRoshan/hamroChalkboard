@@ -1,28 +1,20 @@
-.PHONY: help build start stop restart logs clean
+.PHONY: help build logs frontend stop restartf api dbstart backend
 
 help:
 	@echo "Available targets:"
-	@echo "  build                  - Build Docker containers"
-	@echo "  start                  - Start Docker containers"
-	@echo "  start_with_logs        - Start Docker containers"
-	@echo "  stop                   - Stop Docker containers"
-	@echo "  restart                - Restart Docker containers"
-	@echo "  logs                   - View Docker container logs"
-	@echo "  clean                  - Remove Docker containers and volumes"
+	@echo "  build       - Build Docker containers"
+	@echo "  frontend    - Start Frontend"
+	@echo "  stop        - Stop Docker containers"
+	@echo "  restartf    - Restart Frontend and Database"
+	@echo "  logs        - View Docker container logs"
+	@echo "  clean       - Remove Docker containers and volumes"
+	@echo "  dbstart     - Start Database and pgAdmin containers"
+	@echo "  api         - Run API (assuming 'air' command in backend folder)"
+	@echo "  backend     - Start Database and Run API"
 
+# FRONTEND
 build:
 	docker compose build
-
-start:
-	docker compose watch
-
-start_with_logs:
-	docker compose up --watch
-
-stop:
-	docker compose down
-
-restart: stop start
 
 logs:
 	docker compose logs -f
@@ -30,7 +22,19 @@ logs:
 clean:
 	docker compose down -v --remove-orphans
 
-api_start:
-	cd ./backend/bin && ./air
+frontend:
+	docker compose up --watch frontend
 
-start_with_api: alacritty -e start api_start
+stop:
+	docker compose down
+
+restartf: stop frontend
+
+# BACKEND
+api:
+	cd ./backend && ./air
+
+dbstart:
+	docker compose up hc_db hc_pgadmin -d
+
+backend: dbstart api

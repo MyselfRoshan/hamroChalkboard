@@ -1,0 +1,32 @@
+# Test binary, built with 'go test -c'
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the ones you don't need)
+/vendor/
+/Godeps/
+/go/pkg/
+
+# Compiled Go packages (remove the ones you don't need)
+*.a
+
+# Ignoring .env file if used for environment variables
+.env
+
+# MacOS specific
+.DS_Store
+
+# Go specific
+.vscode/
+.idea/
+.idea_modules/
+*.log
+
+# Application binary file (go build output)
+myapp
+
+# Aire specific
+air
+/tmp/

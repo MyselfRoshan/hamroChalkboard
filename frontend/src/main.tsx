@@ -24,7 +24,7 @@ export  function Main() {
   return (
     <>
       <div className="container">
-        <p className="read-the-docs">{message===""?"nothing":message} is showing</p>
+        <p className="read-the-docs">{message===""?"nothing":message}</p>
       </div>
     </>
   );
