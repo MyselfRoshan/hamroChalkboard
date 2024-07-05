@@ -1,0 +1,7 @@
+// Dev container to code inside the docker container i.e. frontend
+{
+    "name": "hamroChalkboard",
+    "service": "frontend",
+    "dockerComposeFile": "./docker-compose.yml",
+    "workspaceFolder": "/app"
+}
