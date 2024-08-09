@@ -2,12 +2,12 @@ services:
   frontend:
     build:
       context: frontend
-    command: pnpm start
+    command: pnpm dev
     container_name: "frontend"
     restart: always
     working_dir: /app
     ports:
-      - 9000:9000
+      - 3000:3000
     develop:
       watch:
         - path: ./frontend/package.json

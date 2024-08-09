@@ -3,5 +3,19 @@
     "name": "hamroChalkboard",
     "service": "frontend",
     "dockerComposeFile": "./docker-compose.yml",
-    "workspaceFolder": "/app"
+    "workspaceFolder": "/app",
+    // "customizations": {
+    // 	// Configure properties specific to VS Code.
+    // 	"vscode": {
+    // 		// Add the IDs of extensions you want installed when the container is created.
+    // 		"extensions": [
+    // 			"dbaeumer.vscode-eslint",
+    //             "esbenp.prettier-vscode"
+    // 		]
+    // 	}
+    // },
+    "mounts": [
+        // "source=vscode-extensions,target=/root/.vscode-server-insiders/extensions,type=volume"
+        "source=profile,target=/home/.vscode,type=volume"
+    ]
 }
