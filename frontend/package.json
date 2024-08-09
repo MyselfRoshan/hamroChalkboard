@@ -1,25 +1,21 @@
 {
-  "name": "react-template",
+  "name": "hamroChalkboard",
+  "private": true,
   "version": "1.0.0",
   "scripts": {
-    "dev": "farm start",
-    "start": "farm start",
-    "build": "farm build",
-    "preview": "farm preview",
-    "clean": "farm clean"
+    "dev": "rsbuild dev",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview"
   },
   "dependencies": {
-    "react": "18",
-    "react-dom": "18"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@farmfe/cli": "^1.0.2",
-    "@farmfe/core": "^1.2.4",
-    "@farmfe/plugin-react": "^1.1.0",
-    "@types/react": "18",
-    "core-js": "^3.36.1",
-    "@types/react-dom": "18",
-    "react-refresh": "^0.14.0"
-  },
-  "packageManager": "pnpm@9.4.0+sha512.f549b8a52c9d2b8536762f99c0722205efc5af913e77835dbccc3b0b0b2ca9e7dc8022b78062c17291c48e88749c70ce88eb5a74f1fa8c4bf5e18bb46c8bd83a"
+    "@rsbuild/core": "1.0.1-beta.11",
+    "@rsbuild/plugin-react": "1.0.1-beta.11",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.5.2"
+  }
 }
