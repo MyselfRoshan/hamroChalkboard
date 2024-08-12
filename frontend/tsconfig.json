@@ -15,19 +15,6 @@
     "moduleResolution": "bundler",
     "useDefineForClassFields": true,
     "allowImportingTsExtensions": true,
-    "baseUrl": ".",
-    "paths": {
-      "/components": [
-        "./src/componenets"
-      ],
-      "/lib": [
-        "./lib"
-      ]
-    }
-  },
-  "include": [
-    "src",
-    "lib",
-    "components"
-  ]
+    "baseUrl": "."
+  }
 }
