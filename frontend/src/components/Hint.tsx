@@ -13,6 +13,7 @@ export interface HintProps {
     align?: "start" | "center" | "end"
     sideOffset?: number
     alignOffset?: number
+    open?: boolean
 }
 export default function Hint({
     label,
@@ -21,10 +22,11 @@ export default function Hint({
     align,
     sideOffset,
     alignOffset,
+    open,
 }: HintProps) {
     return (
         <TooltipProvider>
-            <Tooltip delayDuration={100}>
+            <Tooltip delayDuration={100} open={open}>
                 <TooltipTrigger asChild>{children}</TooltipTrigger>
                 <TooltipContent
                     className="text-white bg-black border-black"

@@ -3,6 +3,9 @@ import Toolbar from "./Toolbar"
 
 import { CanvasMode, CanvasState } from "types/canvas"
 import { PenMenu } from "./PenMenu"
+import { Color } from "@rc-component/color-picker"
+// import { parseColor } from "@react-spectrum/color"
+// import { useColor } from "react-color-palette"
 
 type CanvasProps = {
     boardId: string
@@ -18,9 +21,12 @@ export default function Canvas({ boardId }: CanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
     const [isDrawing, setIsDrawing] = useState<boolean>(false)
-    const [lineWidth, setLineWidth] = useState<number>(5)
-    const [lineColor, setLineColor] = useState<string>("black")
-    const [lineOpacity, setLineOpacity] = useState<number>(1)
+    const [lineWidth, setLineWidth] = useState<number>(1)
+    const [lineColor, setLineColor] = useState("#000000")
+    // Color.
+    // const [lineColor, setLineColor] = useState(parseColor("hsl(0, 0%, 0%)"))
+    // const [lineColor, setLineColor] = useColor("hsl(0, 0%, 0%)")
+    // const [lineOpacity, setLineOpacity] = useState<number>(1)
     var canvasWidth: number = window.innerWidth
     var canvasHeight: number = window.innerHeight
 
@@ -47,13 +53,17 @@ export default function Canvas({ boardId }: CanvasProps) {
             const ctx = canvas.getContext("2d")
             if (ctx) {
                 ctx.lineCap = "round"
-                ctx.globalAlpha = lineOpacity
-                ctx.strokeStyle = lineColor
+                // ctx.globalAlpha = lineOpacity
+                ctx.strokeStyle = lineColor.toString()
                 ctx.lineWidth = lineWidth
                 ctxRef.current = ctx
+
+                // ctx.fillStyle = "green"
+                // ctx.fillRect(10, 10, 150, 100)
             }
         }
-    }, [lineColor, lineOpacity, lineWidth])
+    }, [lineColor, lineWidth])
+    // }, [lineColor, lineOpacity, lineWidth])
 
     // Function for starting the drawing
     const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -103,9 +113,10 @@ export default function Canvas({ boardId }: CanvasProps) {
 
             {canvasState.mode === CanvasMode.Pencil && (
                 <PenMenu
+                    lineColor={lineColor}
                     setLineColor={setLineColor}
+                    lineWidth={lineWidth}
                     setLineWidth={setLineWidth}
-                    setLineOpacity={setLineOpacity}
                 />
             )}
 
