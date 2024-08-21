@@ -4,31 +4,49 @@ import { CanvasMode, CanvasState, LayerType } from "types/canvas"
 import ToolButton from "./ToolButton"
 import {
     Circle,
+    Minus,
     MousePointer2,
     Pencil,
+    Plus,
     Redo2,
     Square,
     StickyNote,
     Type,
     Undo2,
 } from "lucide-react"
+import { Input } from "components/ui/input"
 
 type ToolbarProps = {
     canvasState: CanvasState
     setCanvasState: (newState: CanvasState) => void
     undo: () => void
     redo: () => void
+    scale: number
     canUndo: boolean
     canRedo: boolean
+    // zoomLevel: number
+    // setZoomLevel: (level: number) => void
 }
 export default function Toolbar({
     canvasState,
     setCanvasState,
     undo,
     redo,
+    scale,
     canUndo,
     canRedo,
+    // zoomLevel,
+    // setZoomLevel,
 }: ToolbarProps) {
+    // Zoom in handler
+    // const zoomIn = () => {
+    //     setZoomLevel(Math.min(zoomLevel * 1.2, 5)) // Max zoom level is 5
+    // }
+
+    // // Zoom out handler
+    // const zoomOut = () => {
+    //     setZoomLevel(Math.max(zoomLevel / 1.2, 0.2)) // Min zoom level is 0.2
+    // }
     return (
         // <div className="absolute top-[50%] translate-y-[50%] right-2 grid gap-y-4">
         <div className="absolute top-[20%] translate-y-[50%] right-2 grid gap-y-4">
@@ -129,6 +147,31 @@ export default function Toolbar({
                     isActive={false}
                     onClick={redo}
                     isDisabled={!canRedo}
+                />
+            </div>
+
+            <div className="bg-white rounded-md p-1.5 flex flex-col justify-center gap-y-1 items-center shadow-md">
+                <ToolButton
+                    label="Zoom In"
+                    icon={Plus}
+                    onClick={() => {}}
+
+                    // isActive={false}
+                    // onClick={zoomIn}
+                    // isDisabled={!canUndo}
+                />
+                <Input
+                    className="w-10 h-10 p-1 focus-visible:outline-none text-center"
+                    type="text"
+                    value={Math.floor(scale * 100)}
+                />
+                <ToolButton
+                    label="Zoom Out"
+                    icon={Minus}
+                    isActive={false}
+                    onClick={() => {}}
+                    // onClick={zoomOut}
+                    // isDisabled={!canRedo}
                 />
             </div>
         </div>

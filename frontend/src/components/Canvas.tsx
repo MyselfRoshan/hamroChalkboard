@@ -1,110 +1,79 @@
 import React, { useEffect, useRef, useState } from "react"
 import Toolbar from "./Toolbar"
-
-import { CanvasMode, CanvasState } from "types/canvas"
-import { PenMenu } from "./PenMenu"
+import { CanvasMode, CanvasState, Layer, LayerType } from "types/canvas"
 import { Color } from "@rc-component/color-picker"
-// import { parseColor } from "@react-spectrum/color"
-// import { useColor } from "react-color-palette"
+import { PenMenu } from "./PenMenu"
+import { usePathLayer } from "src/hooks/usePathLayer"
+import { useWindowSize } from "src/hooks/useWindowSize"
+import { useZoom } from "src/hooks/useZoom"
 
 type CanvasProps = {
     boardId: string
 }
+
 export default function Canvas({ boardId }: CanvasProps) {
+    const [layers, setLayers] = useState<Layer[]>([])
+    const { windowWidth, windowHeight } = useWindowSize()
     const [canvasState, setCanvasState] = useState<CanvasState>({
         mode: CanvasMode.None,
     })
 
-    // const history = useHistory()
-
-    // Drawing in Canvas
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
-    const [isDrawing, setIsDrawing] = useState<boolean>(false)
-    const [lineWidth, setLineWidth] = useState<number>(1)
-    const [lineColor, setLineColor] = useState("#000000")
-    // Color.
-    // const [lineColor, setLineColor] = useState(parseColor("hsl(0, 0%, 0%)"))
-    // const [lineColor, setLineColor] = useColor("hsl(0, 0%, 0%)")
-    // const [lineOpacity, setLineOpacity] = useState<number>(1)
-    var canvasWidth: number = window.innerWidth
-    var canvasHeight: number = window.innerHeight
+    const [lineColor, setLineColor] = useState<Color>(new Color("#000000"))
+    const [lineSize, setLineSize] = useState<number>(5) // Line width
 
-    const resizeCanvas = () => {
-        const canvas = canvasRef.current
-        if (canvas) {
-            canvasWidth = window.innerWidth
-            canvasHeight = window.innerHeight
-        }
-    }
-    useEffect(() => {
-        resizeCanvas() // Set initial size
-        window.addEventListener("resize", resizeCanvas) // Adjust size on resize
+    const { pathLayer, startNewPath, drawCurrentPath, finishCurrentPath } =
+        usePathLayer(canvasRef, ctxRef)
 
-        // Cleanup event listener on component unmount
-        return () => {
-            window.removeEventListener("resize", resizeCanvas)
-        }
-    }, [])
-    // Initialization when the component mounts for the first time
+    const { startPan, reset, scale, offset, ratio, viewportTopLeft } = useZoom(
+        canvasRef,
+        ctxRef,
+        windowWidth,
+        windowHeight,
+    )
+
     useEffect(() => {
         const canvas = canvasRef.current
         if (canvas) {
             const ctx = canvas.getContext("2d")
             if (ctx) {
                 ctx.lineCap = "round"
-                // ctx.globalAlpha = lineOpacity
-                ctx.strokeStyle = lineColor.toString()
-                ctx.lineWidth = lineWidth
+                ctx.lineWidth = lineSize
+                canvas.width = windowWidth
+                canvas.height = windowHeight
                 ctxRef.current = ctx
-
-                // ctx.fillStyle = "green"
-                // ctx.fillRect(10, 10, 150, 100)
             }
         }
-    }, [lineColor, lineWidth])
-    // }, [lineColor, lineOpacity, lineWidth])
+    }, [lineSize, windowWidth, windowHeight])
 
-    // Function for starting the drawing
-    const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
-        if (ctxRef.current) {
-            const rect = canvasRef.current?.getBoundingClientRect()
-            const offsetX = e.clientX - (rect?.left || 0)
-            const offsetY = e.clientY - (rect?.top || 0)
-
-            ctxRef.current.beginPath()
-            ctxRef.current.moveTo(offsetX, offsetY)
-            setIsDrawing(true)
+    const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        if (canvasState.mode === CanvasMode.Pencil) {
+            startNewPath(e, lineColor, lineSize)
+        } else {
+            startPan(e)
         }
     }
 
-    // Function for ending the drawing
-    const endDrawing = () => {
-        if (ctxRef.current) {
-            ctxRef.current.closePath()
-            setIsDrawing(false)
+    const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        if (canvasState.mode === CanvasMode.Pencil) {
+            drawCurrentPath(e)
         }
     }
 
-    // Function for drawing
-    const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
-        if (!isDrawing || !ctxRef.current) {
-            return
+    const handleMouseUp = () => {
+        if (canvasState.mode === CanvasMode.Pencil) {
+            finishCurrentPath()
+            setLayers([...layers, pathLayer])
         }
-        const rect = canvasRef.current?.getBoundingClientRect()
-        const offsetX = e.clientX - (rect?.left || 0)
-        const offsetY = e.clientY - (rect?.top || 0)
-
-        ctxRef.current.lineTo(offsetX, offsetY)
-        ctxRef.current.stroke()
     }
-    // End of drawing in canvas
 
     return (
         <main className="h-full w-full relative bg-neutral-100 touch-none">
             <Toolbar
                 canvasState={canvasState}
                 setCanvasState={setCanvasState}
+                scale={scale}
                 canRedo={false}
                 canUndo={false}
                 undo={() => {}}
@@ -115,28 +84,17 @@ export default function Canvas({ boardId }: CanvasProps) {
                 <PenMenu
                     lineColor={lineColor}
                     setLineColor={setLineColor}
-                    lineWidth={lineWidth}
-                    setLineWidth={setLineWidth}
+                    lineSize={lineSize}
+                    setLineSize={setLineSize}
                 />
             )}
 
             <canvas
-                onMouseDown={
-                    canvasState.mode === CanvasMode.Pencil
-                        ? startDrawing
-                        : () => {}
-                }
-                onMouseUp={
-                    canvasState.mode === CanvasMode.Pencil
-                        ? endDrawing
-                        : () => {}
-                }
-                onMouseMove={
-                    canvasState.mode === CanvasMode.Pencil ? draw : () => {}
-                }
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
                 ref={canvasRef}
-                width={canvasWidth}
-                height={canvasHeight}
+                className="h-full w-full touch-none bg-white"
             />
         </main>
     )
