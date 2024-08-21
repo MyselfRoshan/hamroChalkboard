@@ -1,47 +1,73 @@
-import React from "react"
-import "./App.css"
+import React, { useState, useEffect, useRef } from "react"
 import { Slider } from "components/ui/slider"
-import { cn } from "lib/utils"
+import { Label } from "components/ui/label"
+import Hint from "./Hint"
+import ClrPicker from "./Colorpicker"
+import { Color } from "@rc-component/color-picker"
 
 // Define the types for the props
 type MenuProps = {
-    setLineColor: (color: string) => void
-    setLineWidth: (width: number) => void
-    setLineOpacity: (opacity: number) => void
+    lineColor: Color
+    setLineColor: (color: Color) => void
+    lineSize: number
+    setLineSize: (width: number) => void
 }
 
 export const PenMenu: React.FC<MenuProps> = ({
+    lineColor,
     setLineColor,
-    setLineWidth,
-    setLineOpacity,
+    lineSize,
+    setLineSize,
 }) => {
-    // Event handler types
-    const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setLineColor(e.target.value)
+    const [showSizeNum, setShowSizeNum] = useState(false)
+    const sliderRef = useRef<HTMLDivElement>(null)
+
+    function handleWidthChange(value: number[]): void {
+        setLineSize(value[0])
+        setShowSizeNum(true)
     }
 
-    const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setLineWidth(parseInt(e.target.value))
-    }
+    // Use useEffect to handle mouse enter and leave events
+    useEffect(() => {
+        const handleMouseEnter = () => setShowSizeNum(true)
+        const handleMouseLeave = () => setShowSizeNum(false)
 
-    const handleOpacityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setLineOpacity(parseFloat(e.target.value) / 100)
-    }
+        const slider = sliderRef.current
+        if (slider) {
+            slider.addEventListener("mouseenter", handleMouseEnter)
+            slider.addEventListener("mouseleave", handleMouseLeave)
+        }
+        return () => {
+            if (slider) {
+                slider.removeEventListener("mouseenter", handleMouseEnter)
+                slider.removeEventListener("mouseleave", handleMouseLeave)
+            }
+        }
+    }, [])
 
     return (
-        <div className="absolute right-[50%] translate-x-[50%] bottom-2 bg-white rounded-md p-1.5 flex gap-2 items-center shadow-md">
-            <label>Brush Color </label>
-            <input type="color" onChange={handleColorChange} />
-            <label>Brush Width </label>
-            {/* <Slider */}
-            <input type="range" min="3" max="20" onChange={handleWidthChange} />
-            <label>Brush Opacity</label>
-            <input
-                type="range"
-                min="1"
-                max="100"
-                onChange={handleOpacityChange}
-            />
+        <div className="absolute right-[50%] translate-x-[50%] bottom-2 bg-white rounded-md p-1.5 flex gap-2 items-center shadow-md w-[350px]">
+            <Label htmlFor="color">Color</Label>
+            <div>
+                <ClrPicker color={lineColor} setColor={setLineColor} />
+            </div>
+            <Label htmlFor="size">Size</Label>
+            <Hint
+                label={lineSize.toString()}
+                side="top"
+                sideOffset={14}
+                open={showSizeNum}
+            >
+                <Slider
+                    ref={sliderRef}
+                    id="size"
+                    min={1}
+                    max={25}
+                    step={1}
+                    value={[lineSize]}
+                    onValueChange={handleWidthChange}
+                />
+            </Hint>
         </div>
     )
 }

@@ -1,12 +1,15 @@
-export type Color = {
-    r: number
-    g: number
-    b: number
-}
+import { Color } from "@rc-component/color-picker"
 export type Camera = {
     x: number
     y: number
 }
+
+export type Layer =
+    | PathLayer
+    | TextLayer
+    | EllipseLayer
+    | RectangleLayer
+    | NoteLayer
 
 export enum LayerType {
     Rectangle,
@@ -42,6 +45,7 @@ export type PathLayer = {
     height: number
     width: number
     fill: Color
+    size: number
     points: number[][]
     value?: string
 }
