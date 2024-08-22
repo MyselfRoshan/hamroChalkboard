@@ -7,23 +7,23 @@ import { Color } from "@rc-component/color-picker"
 
 // Define the types for the props
 type MenuProps = {
-    lineColor: Color
-    setLineColor: (color: Color) => void
-    lineSize: number
-    setLineSize: (width: number) => void
+    color: Color
+    setColor: (color: Color) => void
+    // size: number
+    // seteSize: (width: number) => void
 }
 
 export const PenMenu: React.FC<MenuProps> = ({
-    lineColor,
-    setLineColor,
-    lineSize,
-    setLineSize,
+    color: lineColor,
+    setColor: setLineColor,
+    // size: lineSize,
+    // seteSize: setLineSize,
 }) => {
     const [showSizeNum, setShowSizeNum] = useState(false)
     const sliderRef = useRef<HTMLDivElement>(null)
 
     function handleWidthChange(value: number[]): void {
-        setLineSize(value[0])
+        // setLineSize(value[0])
         setShowSizeNum(true)
     }
 
@@ -52,7 +52,7 @@ export const PenMenu: React.FC<MenuProps> = ({
                 <ClrPicker color={lineColor} setColor={setLineColor} />
             </div>
             <Label htmlFor="size">Size</Label>
-            <Hint
+            {/* <Hint
                 label={lineSize.toString()}
                 side="top"
                 sideOffset={14}
@@ -67,7 +67,7 @@ export const PenMenu: React.FC<MenuProps> = ({
                     value={[lineSize]}
                     onValueChange={handleWidthChange}
                 />
-            </Hint>
+            </Hint> */}
         </div>
     )
 }

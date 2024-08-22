@@ -7,7 +7,7 @@ import { Button } from "components/ui/button"
 interface ToolButtonProps {
     label: string
     icon: LucideIcon
-    onClick: () => void
+    onClick: (e: React.MouseEvent<HTMLButtonElement>) => void
     isActive?: boolean
     isDisabled?: boolean
 }

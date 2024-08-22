@@ -89,45 +89,75 @@ export enum Side {
     Right = 8,
 }
 
-export type CanvasState =
-    | {
-          mode: CanvasMode.None
-      }
-    | {
-          mode: CanvasMode.Pressing
-          origin: Point
-      }
-    | {
-          mode: CanvasMode.SelectionNet
-          origin: Point
-          current?: Point
-      }
-    | {
-          mode: CanvasMode.Translating
-          current: Point
-      }
-    | {
-          mode: CanvasMode.Inserting
-          layerType:
-              | LayerType.Ellipse
-              | LayerType.Rectangle
-              | LayerType.Text
-              | LayerType.Note
-      }
-    | {
-          mode: CanvasMode.Resizing
-          initialBounds: XYWH
-          corner: Side
-      }
-    | {
-          mode: CanvasMode.Pencil
-      }
+// export type CanvasState =
+//     | {
+//           mode: CanvasMode.None
+//       }
+//     | {
+//           mode: CanvasMode.Pressing
+//           origin: Point
+//       }
+//     | {
+//           mode: CanvasMode.SelectionNet
+//           origin: Point
+//           current?: Point
+//       }
+//     | {
+//           mode: CanvasMode.Translating
+//           current: Point
+//       }
+//     | {
+//           mode: CanvasMode.Inserting
+//           layerType:
+//               | LayerType.Ellipse
+//               | LayerType.Rectangle
+//               | LayerType.Text
+//               | LayerType.Note
+//       }
+//     | {
+//           mode: CanvasMode.Resizing
+//           initialBounds: XYWH
+//           corner: Side
+//       }
+//     | {
+//           mode: CanvasMode.Pencil
+//       }
+//     | {
+//           mode: CanvasMode.Pan
+//       }
+
+// export enum CanvasMode {
+//     None,
+//     Pressing,
+//     SelectionNet,
+//     Translating,
+//     Inserting,
+//     Resizing,
+//     Pencil,
+//     Pan,
+// }
+
 export enum CanvasMode {
     None,
-    Pressing,
-    SelectionNet,
-    Translating,
-    Inserting,
-    Resizing,
+    Pan,
     Pencil,
+    Line,
+    Rect,
+    Circle,
 }
+
+export type CanvasSetting = {
+    stroke: number
+    color: Color
+    mode: CanvasMode
+}
+
+// export const MODES = {
+//     PAN: 0,
+//     PEN: 1,
+//     LINE: 2,
+//     RECT: 3,
+//     CIRCLE: 4,
+// }
+
+// export const PAN_LIMIT = 3000
