@@ -1,14 +1,23 @@
+import { Color } from "@rc-component/color-picker"
 import { createLazyFileRoute } from "@tanstack/react-router"
-import Toolbar from "../components/Toolbar"
+import { useRef } from "react"
 import Canvas from "src/components/Canvas"
-import ClrPicker from "src/components/Colorpicker"
+import { useWindowSize } from "src/hooks/useWindowSize"
+import { CanvasMode, CanvasSetting, LayerType } from "types/canvas"
 // import { ColorPicker, useColor } from "react-color-palette"
+
 export const Route = createLazyFileRoute("/")({
     component: () => {
-        // const [color, setColor] = useColor("rgb(86 30 203)")
+        const settings = useRef<CanvasSetting>({
+            stroke: 3,
+            color: new Color("#000"),
+            mode: CanvasMode.Pan,
+        })
+
+        const size = useWindowSize()
         return (
             <>
-                <Canvas boardId="1" />
+                <Canvas boardId="1" settings={settings} size={size} />
                 {/* <ColorPicker color={color} onChange={setColor} /> */}
             </>
         )
