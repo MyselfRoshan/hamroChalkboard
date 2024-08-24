@@ -37,6 +37,8 @@ h1 {
     margin: auto;
     margin-top: 10px;
 } */
+
+/*
 * {
     padding: 0;
     margin: 0;
@@ -50,34 +52,34 @@ h1 {
 body {
     background-color: #c9c9c9;
     touch-action: none;
-}
+} */
 
-.app {
+/* .app {
     display: flex;
     height: 100vh;
     width: 100vw;
     overflow: hidden;
-}
+} */
 
-.canvas-container {
+/* .canvas-container {
     position: relative;
     width: min-content;
     box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
     align-self: center;
     margin: auto;
     background-color: white;
-}
+} */
 
-.canvas-container canvas {
+canvas {
     display: block;
 }
-
-.canvas-container canvas.moving {
+canvas.moving {
     cursor: grab;
 }
 
-.canvas-container canvas.moving:active {
+canvas.moving:active {
     cursor: grabbing;
+    background: red;
 }
 
 .canvas-container .menu {
