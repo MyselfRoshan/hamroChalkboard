@@ -1,11 +1,10 @@
-import { Color } from "@rc-component/color-picker"
-import ColorPicker, { ColorBlock } from "@rc-component/color-picker"
+import { Label } from "@radix-ui/react-label"
+import ColorPicker, { Color, ColorBlock } from "@rc-component/color-picker"
 import Trigger from "@rc-component/trigger"
-import React, { useMemo } from "react"
+import { Input } from "components/ui/input"
+import { useMemo } from "react"
 import "./main.css"
 import builtinPlacements from "./placement"
-import { Input } from "components/ui/input"
-import { Label } from "@radix-ui/react-label"
 
 type ClrPickerProps = {
     color: Color

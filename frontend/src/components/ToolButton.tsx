@@ -1,18 +1,22 @@
-import React from "react"
-import ToolTip from "./Hint"
-import { Icon, LucideIcon } from "lucide-react"
-import Hint from "./Hint"
 import { Button } from "components/ui/button"
+import { cn } from "lib/utils"
+import { LucideIcon } from "lucide-react"
+import { MouseEventHandler } from "react"
+import Hint from "./Hint"
 
 interface ToolButtonProps {
+    className?: string | undefined
     label: string
+    side?: "top" | "bottom" | "left" | "right"
     icon: LucideIcon
-    onClick: (e: React.MouseEvent<HTMLButtonElement>) => void
+    onClick?: MouseEventHandler<any> | undefined
     isActive?: boolean
     isDisabled?: boolean
 }
 export default function ToolButton({
+    className,
     label,
+    side,
     icon: Icon,
     onClick,
     isActive,
@@ -20,9 +24,9 @@ export default function ToolButton({
 }: ToolButtonProps) {
     return (
         <div>
-            <Hint label={label} side="left" sideOffset={14}>
+            <Hint label={label} side={side ?? "right"} sideOffset={12}>
                 <Button
-                    // className="rounded-full"
+                    className={cn("p-1", className)}
                     disabled={isDisabled}
                     onClick={onClick}
                     size={"icon"}

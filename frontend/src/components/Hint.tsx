@@ -1,12 +1,12 @@
-import React from "react"
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
 } from "components/ui/tooltip"
+import React from "react"
 
-export interface HintProps {
+export type HintProps = {
     label: string
     children: React.ReactNode
     side?: "top" | "bottom" | "left" | "right"
