@@ -21,4 +21,4 @@
 -   Figma clone: https://www.youtube.com/watch?v=oKIThIihv60
 -   Drawing App references (Next js Project): https://www.youtube.com/watch?v=ADJKbuayubE
 
--   [ ] Make tailwind css to work
+-   [x] Make tailwind css to work
