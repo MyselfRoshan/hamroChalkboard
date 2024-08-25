@@ -49,8 +49,8 @@ export default function Canvas({ settings, size }: CanvasProps) {
     const isMoving = useRef<boolean>(false)
     const importInput = useRef<HTMLInputElement | null>(null)
 
-    const [scale, setScale] = useState<number>(1)
-    const [scaleOffset, setScaleOffset] = useState<Point>([0, 0])
+    // const [scale, setScale] = useState<number>(1)
+    // const [scaleOffset, setScaleOffset] = useState<Point>([0, 0])
     // const { startPan, reset, scale, offset, ratio, viewportTopLeft, setZoom } =
     //     useZoom(canvasRef, ctxRef, size.width, size.height)
     // const
@@ -154,8 +154,6 @@ export default function Canvas({ settings, size }: CanvasProps) {
     ) => {
         switch (mode) {
             case CanvasMode.Pencil:
-                // const points = addPoint(path, point!)
-                // point ? previewPen(point, ctx) : drawPen(points, ctx)
                 point ? previewPen(point, ctx) : drawPen(path, ctx)
                 break
             case CanvasMode.Rect:
@@ -242,13 +240,16 @@ export default function Canvas({ settings, size }: CanvasProps) {
     }
 
     const previewPen = (point: Point, ctx: CanvasRenderingContext2D) => {
+        console.log(isDrawing.current, drawing, isMoving.current)
         if (lastPath.length === 0) {
             ctx.beginPath()
             ctx.moveTo(point[0], point[1])
+            // console.log("before: ", point[0], point[1])
         }
         ctx.lineTo(point[0], point[1])
         ctx.stroke()
         lastPath.push(point)
+        // console.log("after: ", point[0], point[1])
     }
 
     const drawPen = (points: Point[], ctx: CanvasRenderingContext2D) => {
@@ -321,7 +322,8 @@ export default function Canvas({ settings, size }: CanvasProps) {
             document.removeEventListener("pointermove", onPointerMove)
             document.removeEventListener("wheel", onWheel)
         }
-    }, [width, height, scale])
+    }, [width, height])
+    // }, [width, height, scale])
 
     const changeColor = (color: Color) => {
         settings.current.color = color
@@ -359,9 +361,9 @@ export default function Canvas({ settings, size }: CanvasProps) {
         importInput.current?.click()
     }
 
-    const setZoom = (delta: number) => {
-        setScale(prevState => Math.min(Math.max(prevState + delta, 0.1), 20))
-    }
+    // const setZoom = (delta: number) => {
+    //     setScale(prevState => Math.min(Math.max(prevState + delta, 0.1), 20))
+    // }
     return (
         <>
             <canvas
