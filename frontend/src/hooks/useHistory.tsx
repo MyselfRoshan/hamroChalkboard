@@ -1,5 +1,6 @@
-import { useCallback, useRef } from "react"
-import { History } from "src/components/Canvas"
+import { ReactNode } from "@tanstack/react-router"
+import { createContext, useCallback, useContext, useRef } from "react"
+import { History } from "types/canvas"
 
 const useHistory = () => {
     const historyRef = useRef<History[]>([])
@@ -39,4 +40,27 @@ const useHistory = () => {
     }
 }
 
-export default useHistory
+type HistoryContextType = ReturnType<typeof useHistory>
+
+const HistoryContext = createContext<HistoryContextType | undefined>(undefined)
+
+export const HistoryProvider: React.FC<{ children: ReactNode }> = ({
+    children,
+}) => {
+    const history = useHistory()
+    return (
+        <HistoryContext.Provider value={history}>
+            {children}
+        </HistoryContext.Provider>
+    )
+}
+
+export const useHistoryContext = (): HistoryContextType => {
+    const context = useContext(HistoryContext)
+    if (context === undefined) {
+        throw new Error(
+            "useHistoryContext must be used within a HistoryProvider",
+        )
+    }
+    return context
+}

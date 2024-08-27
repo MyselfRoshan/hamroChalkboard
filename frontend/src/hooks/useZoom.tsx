@@ -6,40 +6,43 @@ import {
     useRef,
     useState,
 } from "react"
-import { Point } from "types/canvas"
+import { Point } from "src/components/Canvas"
 
 type CanvasProps = {
-    canvasRef: React.RefObject<HTMLCanvasElement>
-    ctxRef: React.RefObject<CanvasRenderingContext2D>
-    canvasWidth: number
-    canvasHeight: number
+    // canvasRef: React.RefObject<HTMLCanvasElement>
+    width: number
+    height: number
 }
 
-const ORIGIN = Object.freeze({ x: 0, y: 0 })
+//   type Point = {
+//     x: number;
+//     y: number;
+//   };
+
+const ORIGIN: Point = [0, 0]
 
 // adjust to device to avoid blur
 const { devicePixelRatio: ratio = 1 } = window
 
-function diffPoints(p1: Point, p2: Point) {
-    return { x: p1.x - p2.x, y: p1.y - p2.y }
+function diffPoints(p1: Point, p2: Point): Point {
+    return [p1[0] - p2[0], p1[1] - p2[1]]
 }
 
-function addPoints(p1: Point, p2: Point) {
-    return { x: p1.x + p2.x, y: p1.y + p2.y }
+function addPoints(p1: Point, p2: Point): Point {
+    return [p1[0] + p2[0], p1[1] + p2[1]]
 }
 
-function scalePoint(p1: Point, scale: number) {
-    return { x: p1.x / scale, y: p1.y / scale }
+function scalePoint(p1: Point, scale: number): Point {
+    return [p1[0] / scale, p1[1] / scale]
 }
 
 const ZOOM_SENSITIVITY = 500 // bigger for lower zoom per scroll
 
-export default function ZoomLevel({
-    canvasRef,
-    ctxRef,
-    canvasWidth,
-    canvasHeight,
-}: CanvasProps) {
+export default function CanvasT({ ...props }: CanvasProps) {
+    const canvasRef = useRef<HTMLCanvasElement>(null)
+    const [context, setContext] = useState<CanvasRenderingContext2D | null>(
+        null,
+    )
     const [scale, setScale] = useState<number>(1)
     const [offset, setOffset] = useState<Point>(ORIGIN)
     const [mousePos, setMousePos] = useState<Point>(ORIGIN)
@@ -55,16 +58,16 @@ export default function ZoomLevel({
 
     // reset
     const reset = useCallback(
-        (ctx: CanvasRenderingContext2D) => {
-            if (ctx && !isResetRef.current) {
+        (context: CanvasRenderingContext2D) => {
+            if (context && !isResetRef.current) {
                 // adjust for device pixel density
-                ctx.canvas.width = canvasWidth * ratio
-                ctx.canvas.height = canvasHeight * ratio
-                ctx.scale(ratio, ratio)
+                context.canvas.width = props.width * ratio
+                context.canvas.height = props.height * ratio
+                context.scale(ratio, ratio)
                 setScale(1)
 
                 // reset state and refs
-                // setContext(ctx)
+                setContext(context)
                 setOffset(ORIGIN)
                 setMousePos(ORIGIN)
                 setViewportTopLeft(ORIGIN)
@@ -75,22 +78,25 @@ export default function ZoomLevel({
                 isResetRef.current = true
             }
         },
-        [canvasWidth, canvasHeight],
+        [props.width, props.height],
     )
 
     // functions for panning
     const mouseMove = useCallback(
         (event: MouseEvent) => {
-            if (ctxRef.current) {
+            if (context) {
                 const lastMousePos = lastMousePosRef.current
-                const currentMousePos = { x: event.pageX, y: event.pageY } // use document so can pan off element
+                const currentMousePos: Point = [event.pageX, event.pageY] // use document so can pan off element
                 lastMousePosRef.current = currentMousePos
 
                 const mouseDiff = diffPoints(currentMousePos, lastMousePos)
-                setOffset(prevOffset => addPoints(prevOffset, mouseDiff))
+                setOffset(
+                    (prevOffset: Point) =>
+                        addPoints(prevOffset, mouseDiff) as Point,
+                )
             }
         },
-        [ctxRef],
+        [context],
     )
 
     const mouseUp = useCallback(() => {
@@ -102,7 +108,7 @@ export default function ZoomLevel({
         (event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
             document.addEventListener("mousemove", mouseMove)
             document.addEventListener("mouseup", mouseUp)
-            lastMousePosRef.current = { x: event.pageX, y: event.pageY }
+            lastMousePosRef.current = [event.pageX, event.pageY]
         },
         [mouseMove, mouseUp],
     )
@@ -117,24 +123,23 @@ export default function ZoomLevel({
                 reset(renderCtx)
             }
         }
-    }, [reset, canvasHeight, canvasWidth])
+    }, [reset, props.height, props.width])
 
     // pan when offset or scale changes
     useLayoutEffect(() => {
-        if (ctxRef.current && lastOffsetRef.current) {
+        if (context && lastOffsetRef.current) {
             const offsetDiff = scalePoint(
                 diffPoints(offset, lastOffsetRef.current),
                 scale,
             )
-            ctxRef.current.translate(offsetDiff.x, offsetDiff.y)
+            context.translate(offsetDiff[0], offsetDiff[1])
             setViewportTopLeft(prevVal => diffPoints(prevVal, offsetDiff))
             isResetRef.current = false
         }
-    }, [ctxRef, offset, scale])
+    }, [context, offset, scale])
 
     // draw
     useLayoutEffect(() => {
-        const context = ctxRef.current
         if (context) {
             const squareSize = 20
 
@@ -144,39 +149,47 @@ export default function ZoomLevel({
             context.setTransform(storedTransform)
 
             context.fillRect(
-                canvasWidth / 2 - squareSize / 2,
-                canvasHeight / 2 - squareSize / 2,
+                props.width / 2 - squareSize / 2,
+                props.height / 2 - squareSize / 2,
                 squareSize,
                 squareSize,
             )
-            context.arc(viewportTopLeft.x, viewportTopLeft.y, 5, 0, 2 * Math.PI)
+            context.arc(
+                viewportTopLeft[0],
+                viewportTopLeft[1],
+                5,
+                0,
+                2 * Math.PI,
+            )
             context.fillStyle = "red"
             context.fill()
         }
-    }, [canvasWidth, canvasHeight, ctxRef, scale, offset, viewportTopLeft])
+    }, [props.width, props.height, context, scale, offset, viewportTopLeft])
 
     // add event listener on canvas for mouse position
     useEffect(() => {
-        const canvas = canvasRef.current
-        if (canvas === null) {
+        const canvasElem = canvasRef.current
+        if (canvasElem === null) {
             return
         }
 
         function handleUpdateMouse(event: MouseEvent) {
             event.preventDefault()
             if (canvasRef.current) {
-                const viewportMousePos = { x: event.clientX, y: event.clientY }
-                const topLeftCanvasPos = {
-                    x: canvasRef.current.offsetLeft,
-                    y: canvasRef.current.offsetTop,
-                }
+                const viewportMousePos: Point = [event.clientX, event.clientY]
+                const topLeftCanvasPos: Point = [
+                    canvasRef.current.offsetLeft,
+                    canvasRef.current.offsetTop,
+                ]
                 setMousePos(diffPoints(viewportMousePos, topLeftCanvasPos))
             }
         }
 
-        canvas.addEventListener("wheel", handleUpdateMouse)
+        canvasElem.addEventListener("mousemove", handleUpdateMouse)
+        canvasElem.addEventListener("wheel", handleUpdateMouse)
         return () => {
-            canvas.removeEventListener("wheel", handleUpdateMouse)
+            canvasElem.removeEventListener("mousemove", handleUpdateMouse)
+            canvasElem.removeEventListener("wheel", handleUpdateMouse)
         }
     }, [])
 
@@ -191,23 +204,24 @@ export default function ZoomLevel({
         // the mouse doesn't move during scale - the 'zoom point' of the mouse
         // before and after zoom is relatively the same position on the viewport
         function handleWheel(event: WheelEvent) {
-            /* Here mousePos.x and mousePos.y are same as x and y in onCanvasMove */
             event.preventDefault()
-            const context = ctxRef.current
             if (context) {
                 const zoom = 1 - event.deltaY / ZOOM_SENSITIVITY
-                const viewportTopLeftDelta = {
-                    x: (mousePos.x / scale) * (1 - 1 / zoom),
-                    y: (mousePos.y / scale) * (1 - 1 / zoom),
-                }
+                const viewportTopLeftDelta: Point = [
+                    (mousePos[0] / scale) * (1 - 1 / zoom),
+                    (mousePos[1] / scale) * (1 - 1 / zoom),
+                ]
                 const newViewportTopLeft = addPoints(
                     viewportTopLeft,
                     viewportTopLeftDelta,
                 )
 
-                context.translate(viewportTopLeft.x, viewportTopLeft.y)
+                context.translate(viewportTopLeft[0], viewportTopLeft[1])
                 context.scale(zoom, zoom)
-                context.translate(-newViewportTopLeft.x, -newViewportTopLeft.y)
+                context.translate(
+                    -newViewportTopLeft[0],
+                    -newViewportTopLeft[1],
+                )
 
                 setViewportTopLeft(newViewportTopLeft)
                 setScale(scale * zoom)
@@ -217,31 +231,25 @@ export default function ZoomLevel({
 
         canvasElem.addEventListener("wheel", handleWheel)
         return () => canvasElem.removeEventListener("wheel", handleWheel)
-    }, [ctxRef, mousePos.x, mousePos.y, viewportTopLeft, scale])
+    }, [context, mousePos[0], mousePos[1], viewportTopLeft, scale])
 
     return (
         <div>
-            <button
-                onClick={() =>
-                    ctxRef && ctxRef.current && reset(ctxRef.current)
-                }
-            >
-                Reset
-            </button>
+            <button onClick={() => context && reset(context)}>Reset</button>
             <pre>scale: {scale}</pre>
             <pre>offset: {JSON.stringify(offset)}</pre>
             <pre>viewportTopLeft: {JSON.stringify(viewportTopLeft)}</pre>
-            {/* <canvas
+            <canvas
                 onMouseDown={startPan}
                 ref={canvasRef}
-                width={canvasWidth * ratio}
-                height={canvasHeight * ratio}
+                width={props.width * ratio}
+                height={props.height * ratio}
                 style={{
                     border: "2px solid #000",
-                    width: `${canvasWidth}px`,
-                    height: `${canvasHeight}px`,
+                    width: `${props.width}px`,
+                    height: `${props.height}px`,
                 }}
-            ></canvas> */}
+            ></canvas>
         </div>
     )
 }
