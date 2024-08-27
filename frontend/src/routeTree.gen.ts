@@ -16,9 +16,21 @@ import { Route as rootRoute } from './routes/__root'
 
 // Create Virtual Routes
 
+const FeaturesLazyImport = createFileRoute('/features')()
+const DrawLazyImport = createFileRoute('/draw')()
 const IndexLazyImport = createFileRoute('/')()
 
 // Create/Update Routes
+
+const FeaturesLazyRoute = FeaturesLazyImport.update({
+  path: '/features',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/features.lazy').then((d) => d.Route))
+
+const DrawLazyRoute = DrawLazyImport.update({
+  path: '/draw',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/draw.lazy').then((d) => d.Route))
 
 const IndexLazyRoute = IndexLazyImport.update({
   path: '/',
@@ -36,12 +48,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/draw': {
+      id: '/draw'
+      path: '/draw'
+      fullPath: '/draw'
+      preLoaderRoute: typeof DrawLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/features': {
+      id: '/features'
+      path: '/features'
+      fullPath: '/features'
+      preLoaderRoute: typeof FeaturesLazyImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren({ IndexLazyRoute })
+export const routeTree = rootRoute.addChildren({
+  IndexLazyRoute,
+  DrawLazyRoute,
+  FeaturesLazyRoute,
+})
 
 /* prettier-ignore-end */
 
@@ -51,11 +81,19 @@ export const routeTree = rootRoute.addChildren({ IndexLazyRoute })
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/"
+        "/",
+        "/draw",
+        "/features"
       ]
     },
     "/": {
       "filePath": "index.lazy.tsx"
+    },
+    "/draw": {
+      "filePath": "draw.lazy.tsx"
+    },
+    "/features": {
+      "filePath": "features.lazy.tsx"
     }
   }
 }

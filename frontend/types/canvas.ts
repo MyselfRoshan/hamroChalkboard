@@ -1,93 +1,89 @@
-import { Color } from "@rc-component/color-picker"
-export type Camera = {
-    x: number
-    y: number
-}
+// export type Color = string
 
-export type Layer =
-    | PathLayer
-    | TextLayer
-    | EllipseLayer
-    | RectangleLayer
-    | NoteLayer
+// export type Camera = {
+//     x: number
+//     y: number
+// }
 
-export enum LayerType {
-    Rectangle,
-    Ellipse,
-    Path,
-    Text,
-    Note,
-}
+// export type Layer =
+//     | PathLayer
+//     | TextLayer
+//     | EllipseLayer
+//     | RectangleLayer
+//     | NoteLayer
 
-export type RectangleLayer = {
-    type: LayerType.Rectangle
-    x: number
-    y: number
-    height: number
-    width: number
-    fill: Color
-    value?: string
-}
-export type EllipseLayer = {
-    type: LayerType.Ellipse
-    x: number
-    y: number
-    height: number
-    width: number
-    fill: Color
-    value?: string
-}
+// export enum LayerType {
+//     Rectangle,
+//     Ellipse,
+//     Path,
+//     Text,
+//     Note,
+// }
 
-export type PathLayer = {
-    type: LayerType.Path
-    x: number
-    y: number
-    height: number
-    width: number
-    fill: Color
-    size: number
-    points: number[][]
-    value?: string
-}
+// export type RectangleLayer = {
+//     type: LayerType.Rectangle
+//     x: number
+//     y: number
+//     height: number
+//     width: number
+//     fill: Color
+//     value?: string
+// }
+// export type EllipseLayer = {
+//     type: LayerType.Ellipse
+//     x: number
+//     y: number
+//     height: number
+//     width: number
+//     fill: Color
+//     value?: string
+// }
 
-export type TextLayer = {
-    type: LayerType.Text
-    x: number
-    y: number
-    height: number
-    width: number
-    fill: Color
-    value?: string
-}
+// export type PathLayer = {
+//     type: LayerType.Path
+//     x: number
+//     y: number
+//     height: number
+//     width: number
+//     fill: Color
+//     size: number
+//     points: number[][]
+//     value?: string
+// }
 
-export type NoteLayer = {
-    type: LayerType.Note
-    x: number
-    y: number
-    height: number
-    width: number
-    fill: Color
-    value?: string
-}
+// export type TextLayer = {
+//     type: LayerType.Text
+//     x: number
+//     y: number
+//     height: number
+//     width: number
+//     fill: Color
+//     value?: string
+// }
 
-export type Point = {
-    x: number
-    y: number
-}
+// export type NoteLayer = {
+//     type: LayerType.Note
+//     x: number
+//     y: number
+//     height: number
+//     width: number
+//     fill: Color
+//     value?: string
+// }
 
-export type XYWH = {
-    x: number
-    y: number
-    width: number
-    height: number
-}
+// export type XYWH = {
+//     x: number
+//     y: number
+//     width: number
+//     height: number
+// }
 
-export enum Side {
-    Top = 1,
-    Bottom = 2,
-    Left = 4,
-    Right = 8,
-}
+// export enum Side {
+//     Top = 1,
+//     Bottom = 2,
+//     Left = 4,
+//     Right = 8,
+// }
 
 // export type CanvasState =
 //     | {
@@ -147,8 +143,16 @@ export enum CanvasMode {
     Ellipse,
 }
 
+export type History = {
+    mode: CanvasMode
+    path: Point[]
+    color: string
+    stroke: number
+}
+export type Point = [x: number, y: number]
 export type CanvasSetting = {
     stroke: number
-    color: Color
+    // color: Color
+    color: string
     mode: CanvasMode
 }

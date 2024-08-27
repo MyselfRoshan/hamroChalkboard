@@ -1,8 +1,8 @@
+import { Input } from "components/ui/input"
 import { Label } from "components/ui/label"
 import { Slider } from "components/ui/slider"
 import React, { useEffect, useRef, useState } from "react"
 import { CanvasSetting } from "types/canvas"
-import ClrPicker from "./Colorpicker"
 import Hint from "./Hint"
 
 // Define the types for the props
@@ -46,9 +46,11 @@ export const CustomizationBar: React.FC<MenuProps> = ({ settings }) => {
     return (
         <div className="absolute right-[50%] translate-x-[50%] bottom-2 bg-white rounded-md p-1.5 flex gap-2 items-center shadow-md w-[350px]">
             <Label htmlFor="color">Color</Label>
-            <div>
-                <ClrPicker color={color} setColor={setColor} />
-            </div>
+            <Input
+                className="w-7 h-7 p-0"
+                type="color"
+                onChange={e => setColor(e.target.value)}
+            />
             <Label htmlFor="stroke">Stroke</Label>
             <Hint
                 label={stroke.toString()}
@@ -59,7 +61,7 @@ export const CustomizationBar: React.FC<MenuProps> = ({ settings }) => {
                 <Slider
                     ref={sliderRef}
                     id="stroke"
-                    min={1}
+                    min={3}
                     max={25}
                     step={1}
                     value={[stroke]}

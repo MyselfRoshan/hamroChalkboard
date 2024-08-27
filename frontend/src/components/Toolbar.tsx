@@ -1,7 +1,16 @@
 import React from "react"
 import { CanvasMode } from "types/canvas"
 
-import { Circle, Hand, Pencil, Redo2, Square, Undo2 } from "lucide-react"
+import {
+    Circle,
+    Hand,
+    Pen,
+    PencilLine,
+    Redo2,
+    Square,
+    Undo2,
+} from "lucide-react"
+import useKeyboardShortcuts from "src/hooks/useKeyboardShortcuts"
 import ToolButton from "./ToolButton"
 
 type ToolbarProps = {
@@ -9,8 +18,8 @@ type ToolbarProps = {
     // setCanvasState: (newState: CanvasState) => void
     canvasMode: CanvasMode
     setCanvasMode: (mode: CanvasMode) => void
-    undo: (e: React.MouseEvent<HTMLButtonElement>) => void
-    redo: (e: React.MouseEvent<HTMLButtonElement>) => void
+    undo: (e: React.MouseEvent<HTMLButtonElement> | KeyboardEvent) => void
+    redo: (e: React.MouseEvent<HTMLButtonElement> | KeyboardEvent) => void
     canUndo: boolean
     canRedo: boolean
     // color: Color
@@ -37,6 +46,13 @@ export default function Toolbar({
     // zoomLevel,
     // setZoomLevel,
 }: ToolbarProps) {
+    const shortcuts = {
+        "z+ctrl": (e: KeyboardEvent) => undo(e),
+        "y+ctrl": (e: KeyboardEvent) => redo(e),
+    }
+
+    // Use the custom hook
+    useKeyboardShortcuts(shortcuts)
     const modeButtons = [
         {
             mode: CanvasMode.Pan,
@@ -44,9 +60,14 @@ export default function Toolbar({
             icon: Hand,
         },
         {
+            mode: CanvasMode.Line,
+            label: "Line",
+            icon: PencilLine,
+        },
+        {
             mode: CanvasMode.Pencil,
             label: "Pen",
-            icon: Pencil,
+            icon: Pen,
         },
         {
             mode: CanvasMode.Rect,
@@ -59,6 +80,7 @@ export default function Toolbar({
             icon: Circle,
         },
     ]
+
     return (
         <>
             <div className="absolute top-[50%] right-2 bg-white rounded-md p-1.5 grid gap-y-1 items-center shadow-md">
