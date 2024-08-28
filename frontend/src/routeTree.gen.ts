@@ -13,14 +13,23 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as RegisterImport } from './routes/register'
 
 // Create Virtual Routes
 
+const LoginLazyImport = createFileRoute('/login')()
 const FeaturesLazyImport = createFileRoute('/features')()
 const DrawLazyImport = createFileRoute('/draw')()
+const ContactLazyImport = createFileRoute('/contact')()
+const AboutLazyImport = createFileRoute('/about')()
 const IndexLazyImport = createFileRoute('/')()
 
 // Create/Update Routes
+
+const LoginLazyRoute = LoginLazyImport.update({
+  path: '/login',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/login.lazy').then((d) => d.Route))
 
 const FeaturesLazyRoute = FeaturesLazyImport.update({
   path: '/features',
@@ -31,6 +40,21 @@ const DrawLazyRoute = DrawLazyImport.update({
   path: '/draw',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/draw.lazy').then((d) => d.Route))
+
+const ContactLazyRoute = ContactLazyImport.update({
+  path: '/contact',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/contact.lazy').then((d) => d.Route))
+
+const AboutLazyRoute = AboutLazyImport.update({
+  path: '/about',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/about.lazy').then((d) => d.Route))
+
+const RegisterRoute = RegisterImport.update({
+  path: '/register',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const IndexLazyRoute = IndexLazyImport.update({
   path: '/',
@@ -48,6 +72,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterImport
+      parentRoute: typeof rootRoute
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/draw': {
       id: '/draw'
       path: '/draw'
@@ -62,6 +107,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FeaturesLazyImport
       parentRoute: typeof rootRoute
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginLazyImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -69,8 +121,12 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren({
   IndexLazyRoute,
+  RegisterRoute,
+  AboutLazyRoute,
+  ContactLazyRoute,
   DrawLazyRoute,
   FeaturesLazyRoute,
+  LoginLazyRoute,
 })
 
 /* prettier-ignore-end */
@@ -82,18 +138,34 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/register",
+        "/about",
+        "/contact",
         "/draw",
-        "/features"
+        "/features",
+        "/login"
       ]
     },
     "/": {
       "filePath": "index.lazy.tsx"
+    },
+    "/register": {
+      "filePath": "register.tsx"
+    },
+    "/about": {
+      "filePath": "about.lazy.tsx"
+    },
+    "/contact": {
+      "filePath": "contact.lazy.tsx"
     },
     "/draw": {
       "filePath": "draw.lazy.tsx"
     },
     "/features": {
       "filePath": "features.lazy.tsx"
+    },
+    "/login": {
+      "filePath": "login.lazy.tsx"
     }
   }
 }
