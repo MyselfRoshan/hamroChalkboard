@@ -25,7 +25,7 @@ export const CustomCursor = ({ size }: CustomCursorProps) => {
   return (
     <div
       id="custom-cursor"
-      className="pointer-events-none absolute z-40 -translate-x-1/2 -translate-y-1/2 rounded bg-[#ff0000] mix-blend-difference"
+      className="pointer-events-none absolute z-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ff0000] mix-blend-difference"
       style={{
         width: `${size! + 1}px`,
         height: `${size! + 1}px`,
