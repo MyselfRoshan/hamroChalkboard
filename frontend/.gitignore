@@ -11,4 +11,4 @@ dist/
 .vscode/*
 !.vscode/extensions.json
 .idea
-./logo
+Logo/*
