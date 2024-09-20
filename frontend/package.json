@@ -1,25 +1,47 @@
 {
-  "name": "react-template",
-  "version": "1.0.0",
-  "scripts": {
-    "dev": "farm start",
-    "start": "farm start",
-    "build": "farm build",
-    "preview": "farm preview",
-    "clean": "farm clean"
-  },
-  "dependencies": {
-    "react": "18",
-    "react-dom": "18"
-  },
-  "devDependencies": {
-    "@farmfe/cli": "^1.0.2",
-    "@farmfe/core": "^1.2.4",
-    "@farmfe/plugin-react": "^1.1.0",
-    "@types/react": "18",
-    "core-js": "^3.36.1",
-    "@types/react-dom": "18",
-    "react-refresh": "^0.14.0"
-  },
-  "packageManager": "pnpm@9.4.0+sha512.f549b8a52c9d2b8536762f99c0722205efc5af913e77835dbccc3b0b0b2ca9e7dc8022b78062c17291c48e88749c70ce88eb5a74f1fa8c4bf5e18bb46c8bd83a"
+    "name": "hamroChalkboard",
+    "private": true,
+    "version": "1.0.0",
+    "scripts": {
+        "dev": "rsbuild dev --open",
+        "build": "rsbuild build",
+        "preview": "rsbuild preview"
+    },
+    "dependencies": {
+        "@radix-ui/react-checkbox": "^1.1.1",
+        "@radix-ui/react-dialog": "^1.1.1",
+        "@radix-ui/react-dropdown-menu": "^2.1.1",
+        "@radix-ui/react-label": "^2.1.0",
+        "@radix-ui/react-popover": "^1.1.1",
+        "@radix-ui/react-select": "^2.1.1",
+        "@radix-ui/react-slider": "^1.2.0",
+        "@radix-ui/react-slot": "^1.1.0",
+        "@radix-ui/react-tooltip": "^1.1.2",
+        "@tanstack/react-router": "^1.47.1",
+        "class-variance-authority": "^0.7.0",
+        "clsx": "^2.1.1",
+        "lucide-react": "^0.427.0",
+        "next-themes": "^0.3.0",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "sonner": "^1.5.0",
+        "tailwind-merge": "^2.4.0",
+        "tailwindcss-animate": "^1.0.7"
+    },
+    "devDependencies": {
+        "@rsbuild/core": "1.0.1-beta.11",
+        "@rsbuild/plugin-react": "1.0.1-beta.11",
+        "@tanstack/router-devtools": "^1.47.1",
+        "@tanstack/router-plugin": "^1.47.0",
+        "@types/react": "^18.3.3",
+        "@types/react-dom": "^18.3.0",
+        "autoprefixer": "^10.4.20",
+        "postcss": "^8.4.41",
+        "postcss-loader": "^8.1.1",
+        "prettier": "^3.3.3",
+        "prettier-plugin-tailwindcss": "^0.6.6",
+        "tailwindcss": "^3.4.9",
+        "typescript": "^5.5.2"
+    },
+    "packageManager": "pnpm@9.7.0+sha512.dc09430156b427f5ecfc79888899e1c39d2d690f004be70e05230b72cb173d96839587545d09429b55ac3c429c801b4dc3c0e002f653830a420fa2dd4e3cf9cf"
 }

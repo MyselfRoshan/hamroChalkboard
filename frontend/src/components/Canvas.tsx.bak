@@ -1,0 +1,971 @@
+// // import React, { useEffect, useRef, useState } from "react"
+// // import Toolbar from "./Toolbar"
+
+// // import { CanvasMode, CanvasState } from "types/canvas"
+// // import { PenMenu } from "./PenMenu"
+// // import { Color } from "@rc-component/color-picker"
+// // // import { parseColor } from "@react-spectrum/color"
+// // // import { useColor } from "react-color-palette"
+
+// // type CanvasProps = {
+// //     boardId: string
+// // }
+// // export default function Canvas({ boardId }: CanvasProps) {
+// //     const [canvasState, setCanvasState] = useState<CanvasState>({
+// //         mode: CanvasMode.None,
+// //     })
+
+// //     // const history = useHistory()
+
+// //     // Drawing in Canvas
+// //     const canvasRef = useRef<HTMLCanvasElement | null>(null)
+// //     const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
+// //     const [isDrawing, setIsDrawing] = useState<boolean>(false)
+// //     const [lineWidth, setLineWidth] = useState<number>(1)
+// //     const [lineColor, setLineColor] = useState<Color>(new Color("#000000"))
+// //     var canvasWidth: number = window.innerWidth
+// //     var canvasHeight: number = window.innerHeight
+
+// //     const resizeCanvas = () => {
+// //         const canvas = canvasRef.current
+// //         if (canvas) {
+// //             canvasWidth = window.innerWidth
+// //             canvasHeight = window.innerHeight
+// //         }
+// //     }
+// //     useEffect(() => {
+// //         resizeCanvas() // Set initial size
+// //         window.addEventListener("resize", resizeCanvas) // Adjust size on resize
+
+// //         // Cleanup event listener on component unmount
+// //         return () => {
+// //             window.removeEventListener("resize", resizeCanvas)
+// //         }
+// //     }, [])
+// //     // Initialization when the component mounts for the first time
+// //     useEffect(() => {
+// //         const canvas = canvasRef.current
+// //         if (canvas) {
+// //             const ctx = canvas.getContext("2d")
+// //             if (ctx) {
+// //                 ctx.lineCap = "round"
+// //                 // ctx.globalAlpha = lineOpacity
+// //                 ctx.strokeStyle = lineColor.toString()
+// //                 ctx.lineWidth = lineWidth
+// //                 ctxRef.current = ctx
+
+// //                 // ctx.fillStyle = "green"
+// //                 // ctx.fillRect(10, 10, 150, 100)
+// //             }
+// //         }
+// //     }, [lineColor, lineWidth])
+// //     // }, [lineColor, lineOpacity, lineWidth])
+
+// //     // Function for starting the drawing
+// //     const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+// //         if (ctxRef.current) {
+// //             const rect = canvasRef.current?.getBoundingClientRect()
+// //             const offsetX = e.clientX - (rect?.left || 0)
+// //             const offsetY = e.clientY - (rect?.top || 0)
+
+// //             ctxRef.current.beginPath()
+// //             ctxRef.current.moveTo(offsetX, offsetY)
+// //             setIsDrawing(true)
+// //         }
+// //     }
+
+// //     // Function for ending the drawing
+// //     const endDrawing = () => {
+// //         if (ctxRef.current) {
+// //             ctxRef.current.closePath()
+// //             setIsDrawing(false)
+// //         }
+// //     }
+
+// //     // Function for drawing
+// //     const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+// //         if (!isDrawing || !ctxRef.current) {
+// //             return
+// //         }
+// //         const rect = canvasRef.current?.getBoundingClientRect()
+// //         const offsetX = e.clientX - (rect?.left || 0)
+// //         const offsetY = e.clientY - (rect?.top || 0)
+
+// //         ctxRef.current.lineTo(offsetX, offsetY)
+// //         ctxRef.current.stroke()
+// //     }
+
+// //     return (
+// //         <main className="h-full w-full relative bg-neutral-100 touch-none">
+// //             <Toolbar
+// //                 canvasState={canvasState}
+// //                 setCanvasState={setCanvasState}
+// //                 canRedo={false}
+// //                 canUndo={false}
+// //                 undo={() => {}}
+// //                 redo={() => {}}
+// //             />
+
+// //             {canvasState.mode === CanvasMode.Pencil && (
+// //                 <PenMenu
+// //                     lineColor={lineColor}
+// //                     setLineColor={setLineColor}
+// //                     lineWidth={lineWidth}
+// //                     setLineWidth={setLineWidth}
+// //                 />
+// //             )}
+
+// //             <canvas
+// //                 onMouseDown={
+// //                     canvasState.mode === CanvasMode.Pencil
+// //                         ? startDrawing
+// //                         : () => {}
+// //                 }
+// //                 onMouseUp={
+// //                     canvasState.mode === CanvasMode.Pencil
+// //                         ? endDrawing
+// //                         : () => {}
+// //                 }
+// //                 onMouseMove={
+// //                     canvasState.mode === CanvasMode.Pencil ? draw : () => {}
+// //                 }
+// //                 ref={canvasRef}
+// //                 width={canvasWidth}
+// //                 height={canvasHeight}
+// //             />
+// //         </main>
+// //     )
+// // }
+// import React, { useEffect, useRef, useState } from "react"
+// import Toolbar from "./Toolbar"
+// import { CanvasMode, CanvasState } from "types/canvas"
+// import { PenMenu } from "./PenMenu"
+// import { Color } from "@rc-component/color-picker"
+
+// type CanvasProps = {
+//     boardId: string
+// }
+
+// export default function Canvas({ boardId }: CanvasProps) {
+//     const [canvasState, setCanvasState] = useState<CanvasState>({
+//         mode: CanvasMode.None,
+//     })
+
+//     const canvasRef = useRef<HTMLCanvasElement | null>(null)
+//     const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
+//     const [isDrawing, setIsDrawing] = useState<boolean>(false)
+//     const [lineWidth, setLineWidth] = useState<number>(1)
+//     const [lineColor, setLineColor] = useState<Color>(new Color("#000000"))
+//     const [points, setPoints] = useState<{ x: number; y: number }[]>([])
+
+//     const canvasWidth: number = window.innerWidth
+//     const canvasHeight: number = window.innerHeight
+
+//     const resizeCanvas = () => {
+//         const canvas = canvasRef.current
+//         if (canvas) {
+//             canvas.width = window.innerWidth
+//             canvas.height = window.innerHeight
+//         }
+//     }
+
+//     useEffect(() => {
+//         resizeCanvas() // Set initial size
+//         window.addEventListener("resize", resizeCanvas) // Adjust size on resize
+
+//         return () => {
+//             window.removeEventListener("resize", resizeCanvas)
+//         }
+//     }, [])
+
+//     useEffect(() => {
+//         const canvas = canvasRef.current
+//         if (canvas) {
+//             const ctx = canvas.getContext("2d")
+//             if (ctx) {
+//                 ctx.lineCap = "round"
+//                 ctx.strokeStyle = lineColor.toString()
+//                 ctx.lineWidth = lineWidth
+//                 ctxRef.current = ctx
+//             }
+//         }
+//     }, [lineColor, lineWidth])
+
+//     const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+//         if (ctxRef.current) {
+//             const rect = canvasRef.current?.getBoundingClientRect()
+//             const offsetX = e.clientX - (rect?.left || 0)
+//             const offsetY = e.clientY - (rect?.top || 0)
+
+//             setPoints([{ x: offsetX, y: offsetY }])
+//             setIsDrawing(true)
+//         }
+//     }
+
+//     const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+//         if (!isDrawing || !ctxRef.current) {
+//             return
+//         }
+
+//         const rect = canvasRef.current?.getBoundingClientRect()
+//         const offsetX = e.clientX - (rect?.left || 0)
+//         const offsetY = e.clientY - (rect?.top || 0)
+
+//         setPoints(prevPoints => [...prevPoints, { x: offsetX, y: offsetY }])
+//         redraw()
+//     }
+
+//     const redraw = () => {
+//         if (!ctxRef.current || points.length < 2) {
+//             return
+//         }
+
+//         const ctx = ctxRef.current
+//         ctx.clearRect(0, 0, canvasWidth, canvasHeight) // Clear canvas before redrawing
+//         ctx.beginPath()
+//         ctx.lineCap = "round"
+//         ctx.strokeStyle = lineColor.toString()
+//         ctx.lineWidth = lineWidth
+
+//         // Start the path
+//         ctx.moveTo(points[0].x, points[0].y)
+
+//         for (let i = 1; i < points.length - 2; i++) {
+//             const x1 = points[i].x
+//             const y1 = points[i].y
+//             const x2 = points[i + 1].x
+//             const y2 = points[i + 1].y
+//             const x3 = points[i + 2].x
+//             const y3 = points[i + 2].y
+
+//             const cp1x = x1 + (x2 - x1) / 3
+//             const cp1y = y1 + (y2 - y1) / 3
+//             const cp2x = x2 - (x3 - x2) / 3
+//             const cp2y = y2 - (y3 - y2) / 3
+
+//             ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x2, y2)
+//         }
+
+//         // Draw the last segment
+//         const last = points[points.length - 1]
+//         ctx.lineTo(last.x, last.y)
+//         ctx.stroke()
+//     }
+
+//     const endDrawing = () => {
+//         if (ctxRef.current) {
+//             ctxRef.current.closePath()
+//             setIsDrawing(false)
+//             setPoints([])
+//         }
+//     }
+
+//     return (
+//         <main className="h-full w-full relative bg-neutral-100 touch-none">
+//             <Toolbar
+//                 canvasState={canvasState}
+//                 setCanvasState={setCanvasState}
+//                 canRedo={false}
+//                 canUndo={false}
+//                 undo={() => {}}
+//                 redo={() => {}}
+//             />
+
+//             {canvasState.mode === CanvasMode.Pencil && (
+//                 <PenMenu
+//                     lineColor={lineColor}
+//                     setLineColor={setLineColor}
+//                     lineWidth={lineWidth}
+//                     setLineWidth={setLineWidth}
+//                 />
+//             )}
+
+//             <canvas
+//                 onMouseDown={
+//                     canvasState.mode === CanvasMode.Pencil
+//                         ? startDrawing
+//                         : () => {}
+//                 }
+//                 onMouseUp={
+//                     canvasState.mode === CanvasMode.Pencil
+//                         ? () => {
+//                               endDrawing
+//                               //   redraw
+//                           }
+//                         : () => {}
+//                 }
+//                 onMouseMove={
+//                     canvasState.mode === CanvasMode.Pencil ? draw : () => {}
+//                 }
+//                 ref={canvasRef}
+//                 width={canvasWidth}
+//                 height={canvasHeight}
+//             />
+//         </main>
+//     )
+// }
+
+/*
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+New one
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+ */
+// import React, { useEffect, useRef, useState } from "react";
+// import Toolbar from "./Toolbar";
+// import { CanvasMode, CanvasState } from "types/canvas";
+// import { PenMenu } from "./PenMenu";
+// import { Color } from "@rc-component/color-picker";
+// import useLocalStorage from "src/hooks/useLocalStorage";
+
+// type CanvasProps = {
+//     boardId: string;
+// };
+
+// type Point = { x: number; y: number };
+
+// const Canvas: React.FC<CanvasProps> = ({ boardId }) => {
+//     const [canvasState, setCanvasState] = useLocalStorage<CanvasState>(`canvasState_${boardId}`, {
+//         mode: CanvasMode.None,
+//     });
+
+//     const [history, setHistory] = useLocalStorage<Point[][]>(`canvasHistory_${boardId}`, []);
+//     const [redoStack, setRedoStack] = useLocalStorage<Point[][]>(`canvasRedoStack_${boardId}`, []);
+
+//     const [currentPoints, setCurrentPoints] = useState<Point[]>([]);
+//     const [isDrawing, setIsDrawing] = useState<boolean>(false);
+//     const [lineWidth, setLineWidth] = useState<number>(1);
+//     const [lineColor, setLineColor] = useState<Color>(new Color("#000000"));
+
+//     const canvasRef = useRef<HTMLCanvasElement | null>(null);
+//     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+
+//     const canvasWidth: number = window.innerWidth;
+//     const canvasHeight: number = window.innerHeight;
+
+//     const resizeCanvas = () => {
+//         const canvas = canvasRef.current;
+//         if (canvas) {
+//             canvas.width = window.innerWidth;
+//             canvas.height = window.innerHeight;
+//         }
+//     };
+
+//     useEffect(() => {
+//         resizeCanvas(); // Set initial size
+//         window.addEventListener("resize", resizeCanvas); // Adjust size on resize
+
+//         return () => {
+//             window.removeEventListener("resize", resizeCanvas);
+//         };
+//     }, []);
+
+//     useEffect(() => {
+//         const canvas = canvasRef.current;
+//         if (canvas) {
+//             const ctx = canvas.getContext("2d");
+//             if (ctx) {
+//                 ctx.lineCap = "round";
+//                 ctx.strokeStyle = lineColor.toString();
+//                 ctx.lineWidth = lineWidth;
+//                 ctxRef.current = ctx;
+//             }
+//         }
+//     }, [lineColor, lineWidth]);
+
+//     const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+//         if (ctxRef.current) {
+//             const rect = canvasRef.current?.getBoundingClientRect();
+//             const offsetX = e.clientX - (rect?.left || 0);
+//             const offsetY = e.clientY - (rect?.top || 0);
+
+//             setCurrentPoints([{ x: offsetX, y: offsetY }]);
+//             setIsDrawing(true);
+//         }
+//     };
+
+//     const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+//         if (!isDrawing || !ctxRef.current) {
+//             return;
+//         }
+
+//         const rect = canvasRef.current?.getBoundingClientRect();
+//         const offsetX = e.clientX - (rect?.left || 0);
+//         const offsetY = e.clientY - (rect?.top || 0);
+
+//         setCurrentPoints(prevPoints => [...prevPoints, { x: offsetX, y: offsetY }]);
+//         redraw();
+//     };
+
+//     const redraw = () => {
+//         if (!ctxRef.current || currentPoints.length < 2) {
+//             return;
+//         }
+
+//         const ctx = ctxRef.current;
+//         ctx.clearRect(0, 0, canvasWidth, canvasHeight); // Clear canvas before redrawing
+//         ctx.beginPath();
+//         ctx.lineCap = "round";
+//         ctx.strokeStyle = lineColor.toString();
+//         ctx.lineWidth = lineWidth;
+
+//         ctx.moveTo(currentPoints[0].x, currentPoints[0].y);
+//         for (let i = 1; i < currentPoints.length - 2; i++) {
+//             const x1 = currentPoints[i].x;
+//             const y1 = currentPoints[i].y;
+//             const x2 = currentPoints[i + 1].x;
+//             const y2 = currentPoints[i + 1].y;
+//             const x3 = currentPoints[i + 2].x;
+//             const y3 = currentPoints[i + 2].y;
+
+//             const cp1x = x1 + (x2 - x1) / 3;
+//             const cp1y = y1 + (y2 - y1) / 3;
+//             const cp2x = x2 - (x3 - x2) / 3;
+//             const cp2y = y2 - (y3 - y2) / 3;
+
+//             ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x2, y2);
+//         }
+//         ctx.lineTo(currentPoints[currentPoints.length - 1].x, currentPoints[currentPoints.length - 1].y);
+//         ctx.stroke();
+//     };
+
+//     const endDrawing = () => {
+//         if (ctxRef.current) {
+//             ctxRef.current.closePath();
+//             setIsDrawing(false);
+//             if (currentPoints.length > 0) {
+//                 setHistory(prevHistory => [...prevHistory, currentPoints]);
+//                 setRedoStack([]);
+//             }
+//             setCurrentPoints([]);
+//         }
+//     };
+
+//     const undo = () => {
+//         setHistory(prevHistory => {
+//             if (prevHistory.length === 0) return prevHistory;
+//             const lastState = prevHistory[prevHistory.length - 1];
+//             setRedoStack(prevRedoStack => [lastState, ...prevRedoStack]);
+//             return prevHistory.slice(0, -1);
+//         });
+//     };
+
+//     const redo = () => {
+//         setRedoStack(prevRedoStack => {
+//             if (prevRedoStack.length === 0) return prevRedoStack;
+//             const redoState = prevRedoStack[0];
+//             setHistory(prevHistory => [...prevHistory, redoState]);
+//             return prevRedoStack.slice(1);
+//         });
+//     };
+
+//     useEffect(() => {
+//         const ctx = ctxRef.current;
+//         if (ctx) {
+//             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+//             history.forEach(points => {
+//                 ctx.beginPath();
+//                 ctx.lineCap = "round";
+//                 ctx.strokeStyle = lineColor.toString();
+//                 ctx.lineWidth = lineWidth;
+
+//                 ctx.moveTo(points[0].x, points[0].y);
+//                 for (let i = 1; i < points.length - 2; i++) {
+//                     const x1 = points[i].x;
+//                     const y1 = points[i].y;
+//                     const x2 = points[i + 1].x;
+//                     const y2 = points[i + 1].y;
+//                     const x3 = points[i + 2].x;
+//                     const y3 = points[i + 2].y;
+
+//                     const cp1x = x1 + (x2 - x1) / 3;
+//                     const cp1y = y1 + (y2 - y1) / 3;
+//                     const cp2x = x2 - (x3 - x2) / 3;
+//                     const cp2y = y2 - (y3 - y2) / 3;
+
+//                     ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x2, y2);
+//                 }
+//                 ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
+//                 ctx.stroke();
+//             });
+//         }
+//     }, [history, lineColor, lineWidth, canvasWidth, canvasHeight]);
+
+//     return (
+//         <main className="h-full w-full relative bg-neutral-100 touch-none">
+//             <Toolbar
+//                 canvasState={canvasState}
+//                 setCanvasState={setCanvasState}
+//                 canRedo={redoStack.length > 0}
+//                 canUndo={history.length > 0}
+//                 undo={undo}
+//                 redo={redo}
+//             />
+
+//             {canvasState.mode === CanvasMode.Pencil && (
+//                 <PenMenu
+//                     lineColor={lineColor}
+//                     setLineColor={setLineColor}
+//                     lineWidth={lineWidth}
+//                     setLineWidth={setLineWidth}
+//                 />
+//             )}
+
+//             <canvas
+//                 onMouseDown={
+//                     canvasState.mode === CanvasMode.Pencil
+//                         ? startDrawing
+//                         : () => { }
+//                 }
+//                 onMouseUp={
+//                     canvasState.mode === CanvasMode.Pencil
+//                         ? endDrawing
+//                         : () => { }
+//                 }
+//                 onMouseMove={
+//                     canvasState.mode === CanvasMode.Pencil ? draw : () => { }
+//                 }
+//                 ref={canvasRef}
+//                 width={canvasWidth}
+//                 height={canvasHeight}
+//             />
+//         </main>
+//     );
+// };
+
+// export default Canvas;
+
+/* $$$$$$$$$$$$$$$$$$$$$
+Old Code
+$$$$$$$$$$$$$$$$$$$$*/
+
+// import React, { useEffect, useRef, useState } from "react"
+// import Toolbar from "./Toolbar"
+
+// import { CanvasMode, CanvasState } from "types/canvas"
+// import { PenMenu } from "./PenMenu"
+// import { Color } from "@rc-component/color-picker"
+
+// type CanvasProps = {
+//     boardId: string
+// }
+// export default function Canvas({ boardId }: CanvasProps) {
+//     const [canvasState, setCanvasState] = useState<CanvasState>({
+//         mode: CanvasMode.None,
+//     })
+
+//     // const history = useHistory()
+
+//     // Drawing in Canvas
+//     const canvasRef = useRef<HTMLCanvasElement | null>(null)
+//     const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
+//     const [isDrawing, setIsDrawing] = useState<boolean>(false)
+//     const [lineWidth, setLineWidth] = useState<number>(5)
+//     const [lineColor, setLineColor] = useState<Color>(new Color("#000000"))
+//     const [lineOpacity, setLineOpacity] = useState<number>(1)
+//     var canvasWidth: number = window.innerWidth
+//     var canvasHeight: number = window.innerHeight
+
+//     const resizeCanvas = () => {
+//         const canvas = canvasRef.current
+//         if (canvas) {
+//             canvasWidth = window.innerWidth
+//             canvasHeight = window.innerHeight
+//         }
+//     }
+//     useEffect(() => {
+//         resizeCanvas() // Set initial size
+//         window.addEventListener("resize", resizeCanvas) // Adjust size on resize
+
+//         // Cleanup event listener on component unmount
+//         return () => {
+//             window.removeEventListener("resize", resizeCanvas)
+//         }
+//     }, [])
+//     // Initialization when the component mounts for the first time
+//     useEffect(() => {
+//         const canvas = canvasRef.current
+//         if (canvas) {
+//             const ctx = canvas.getContext("2d")
+//             if (ctx) {
+//                 ctx.lineCap = "round"
+//                 ctx.globalAlpha = lineOpacity
+//                 ctx.strokeStyle = lineColor.toString()
+//                 ctx.lineWidth = lineWidth
+//                 ctxRef.current = ctx
+//             }
+//         }
+//     }, [lineColor, lineOpacity, lineWidth])
+
+//     // Function for starting the drawing
+//     const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+//         if (ctxRef.current) {
+//             const rect = canvasRef.current?.getBoundingClientRect()
+//             const offsetX = e.clientX - (rect?.left || 0)
+//             const offsetY = e.clientY - (rect?.top || 0)
+
+//             ctxRef.current.beginPath()
+//             ctxRef.current.moveTo(offsetX, offsetY)
+//             setIsDrawing(true)
+//         }
+//     }
+
+//     // Function for ending the drawing
+//     const endDrawing = () => {
+//         if (ctxRef.current) {
+//             ctxRef.current.closePath()
+//             setIsDrawing(false)
+//         }
+//     }
+
+//     // Function for drawing
+//     const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+//         if (!isDrawing || !ctxRef.current) {
+//             return
+//         }
+//         const rect = canvasRef.current?.getBoundingClientRect()
+//         const offsetX = e.clientX - (rect?.left || 0)
+//         const offsetY = e.clientY - (rect?.top || 0)
+
+//         ctxRef.current.lineTo(offsetX, offsetY)
+//         ctxRef.current.stroke()
+//     }
+//     // End of drawing in canvas
+
+//     return (
+//         <main className="h-full w-full relative bg-neutral-100 touch-none">
+//             <Toolbar
+//                 canvasState={canvasState}
+//                 setCanvasState={setCanvasState}
+//                 canRedo={false}
+//                 canUndo={false}
+//                 undo={() => { }}
+//                 redo={() => { }}
+//             />
+
+//             {canvasState.mode === CanvasMode.Pencil && (
+//                 <PenMenu
+//                     lineColor={lineColor}
+//                     setLineColor={setLineColor}
+//                     lineWidth={lineWidth}
+//                     setLineWidth={setLineWidth}
+//                 />
+//             )}
+
+//             <canvas
+//                 onMouseDown={
+//                     canvasState.mode === CanvasMode.Pencil
+//                         ? startDrawing
+//                         : () => { }
+//                 }
+//                 onMouseUp={
+//                     canvasState.mode === CanvasMode.Pencil
+//                         ? endDrawing
+//                         : () => { }
+//                 }
+//                 onMouseMove={
+//                     canvasState.mode === CanvasMode.Pencil ? draw : () => { }
+//                 }
+//                 ref={canvasRef}
+//                 width={canvasWidth}
+//                 height={canvasHeight}
+//             />
+//         </main>
+//     )
+// }
+
+// import React, { useEffect, useRef, useState } from "react";
+// import Toolbar from "./Toolbar";
+// import { CanvasMode, CanvasState, PathLayer } from "types/canvas";
+// import { Color } from "@rc-component/color-picker";
+// import { PenMenu } from "./PenMenu";
+// import { usePathLayer } from "src/hooks/usePathLayer";
+// import { useWindowSize } from "src/hooks/useWindowSize";
+
+// type CanvasProps = {
+//     boardId: string;
+// };
+
+// export default function Canvas({ boardId }: CanvasProps) {
+//     const [canvasState, setCanvasState] = useState<CanvasState>({
+//         mode: CanvasMode.None,
+//     });
+
+//     const canvasRef = useRef<HTMLCanvasElement | null>(null);
+//     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+//     const [lineColor, setLineColor] = useState<Color>(new Color("#000000"));
+//     const [lineWidth, setLineWidth] = useState<number>(5);  // New size prop
+
+//     const { layers, startDrawing, draw, endDrawing } = usePathLayer();
+
+//     useEffect(() => {
+//         const canvas = canvasRef.current;
+//         if (canvas) {
+//             const ctx = canvas.getContext("2d");
+//             if (ctx) {
+//                 ctx.lineCap = "round";
+//                 ctxRef.current = ctx;
+//             }
+//         }
+//     }, []);
+
+//     useEffect(() => {
+//         const ctx = ctxRef.current;
+//         if (!ctx) return;
+
+//         ctx.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height); // Clear the canvas
+
+//         layers.forEach((layer) => {
+//             ctx.beginPath();
+//             ctx.strokeStyle = layer.fill.toString();  // Use fill with alpha for opacity
+//             ctx.lineWidth = layer.size;  // Use size for line width
+//             ctx.moveTo(layer.points[0][0], layer.points[0][1]);
+//             layer.points.forEach(([x, y]) => {
+//                 ctx.lineTo(x, y);
+//             });
+//             ctx.stroke();
+//         });
+//     }, [layers]);
+
+//     const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+//         const rect = canvasRef.current?.getBoundingClientRect();
+//         const offsetX = e.clientX - (rect?.left || 0);
+//         const offsetY = e.clientY - (rect?.top || 0);
+
+//         if (canvasState.mode === CanvasMode.Pencil) {
+//             startDrawing(offsetX, offsetY, lineColor, lineWidth);  // Pass color and size
+//         }
+//     };
+
+//     const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+//         const rect = canvasRef.current?.getBoundingClientRect();
+//         const offsetX = e.clientX - (rect?.left || 0);
+//         const offsetY = e.clientY - (rect?.top || 0);
+
+//         if (canvasState.mode === CanvasMode.Pencil) {
+//             draw(offsetX, offsetY);
+//         }
+//     };
+
+//     const handleMouseUp = () => {
+//         if (canvasState.mode === CanvasMode.Pencil) {
+//             endDrawing();
+//         }
+//     };
+
+//     return (
+//         <main className="h-full w-full relative bg-neutral-100 touch-none">
+//             <Toolbar
+//                 canvasState={canvasState}
+//                 setCanvasState={setCanvasState}
+//                 canRedo={false}
+//                 canUndo={false}
+//                 undo={() => { }}
+//                 redo={() => { }}
+//             />
+
+//             {canvasState.mode === CanvasMode.Pencil && (
+//                 <PenMenu
+//                     lineColor={lineColor}
+//                     setLineColor={setLineColor}
+//                     lineWidth={lineWidth}
+//                     setLineWidth={setLineWidth}
+//                 />
+//             )}
+
+//             <canvas
+//                 onMouseDown={handleMouseDown}
+//                 onMouseUp={handleMouseUp}
+//                 onMouseMove={handleMouseMove}
+//                 ref={canvasRef}
+//                 width={window.innerWidth}
+//                 height={window.innerHeight}
+//             />
+//         </main>
+//     );
+// }
+
+import React, { useEffect, useRef, useState } from "react"
+import Toolbar from "./Toolbar"
+import {
+    CanvasMode,
+    CanvasState,
+    EllipseLayer,
+    Layer,
+    LayerType,
+    NoteLayer,
+    PathLayer,
+    RectangleLayer,
+    TextLayer,
+} from "types/canvas"
+import { Color } from "@rc-component/color-picker"
+import { PenMenu } from "./PenMenu"
+import { usePathLayer } from "src/hooks/usePathLayer"
+import { useWindowSize } from "src/hooks/useWindowSize"
+import { useZoom } from "src/hooks/useZoom"
+
+type CanvasProps = {
+    boardId: string
+}
+
+export default function Canvas({ boardId }: CanvasProps) {
+    const [layers, setLayers] = useState<Layer[]>([])
+    const { windowWidth, windowHeight } = useWindowSize()
+    const [canvasState, setCanvasState] = useState<CanvasState>({
+        mode: CanvasMode.None,
+    })
+
+    const canvasRef = useRef<HTMLCanvasElement | null>(null)
+    const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
+    const [lineColor, setLineColor] = useState<Color>(new Color("#000000"))
+    const [lineSize, setLineSize] = useState<number>(5) // Line width
+
+    const { pathLayer, startNewPath, drawCurrentPath, finishCurrentPath } =
+        usePathLayer(canvasRef, ctxRef)
+    // Zoom state
+    // const [zoomLevel, setZoomLevel] = useState<number>(1) // Default zoom level
+    const { startPan, reset, scale, offset, ratio, viewportTopLeft } = useZoom(
+        canvasRef,
+        ctxRef,
+        windowWidth,
+        windowHeight,
+    )
+    useEffect(() => {
+        const canvas = canvasRef.current
+        if (canvas) {
+            const ctx = canvas.getContext("2d")
+            if (ctx) {
+                ctx.lineCap = "round"
+                ctx.lineWidth = lineSize
+                canvas.width = windowWidth
+                canvas.height = windowHeight
+                console.log("canvas", layers)
+                // layers.forEach(layer => {
+                //     switch (layer.type) {
+                //         case LayerType.Path:
+                //             // Handle PathLayer
+                //             ctx.beginPath()
+                //             ctx.moveTo(layer.points[0][0], layer.points[0][1])
+                //             layer.points.forEach((point, index) => {
+                //                 if (index > 0) {
+                //                     ctx.lineTo(point[0], point[1])
+                //                 }
+                //             })
+                //             ctx.stroke()
+                //             break
+                //         case LayerType.Text:
+                //             // Handle TextLayer
+                //             ctx.font = `24px Arial`
+                //             ctx.textAlign = "left"
+                //             ctx.textBaseline = "top"
+                //             ctx.fillStyle = layer.fill.toString()
+                //             // ctx.fillText(layer.text, layer.x, layer.y)
+                //             break
+                //         case LayerType.Ellipse:
+                //             // Handle EllipseLayer
+                //             ctx.beginPath()
+                //             ctx.ellipse(
+                //                 layer.x,
+                //                 layer.y,
+                //                 layer.width,
+                //                 layer.height,
+                //                 0,
+                //                 0,
+                //                 2 * Math.PI,
+                //             )
+                //             ctx.fillStyle = layer.fill.toString()
+                //             ctx.fill()
+                //             break
+                //         case LayerType.Rectangle:
+                //             // Handle RectangleLayer
+                //             ctx.beginPath()
+                //             ctx.rect(
+                //                 layer.x,
+                //                 layer.y,
+                //                 layer.width,
+                //                 layer.height,
+                //             )
+                //             ctx.fillStyle = layer.fill.toString()
+                //             ctx.fill()
+                //             break
+                //         case LayerType.Note:
+                //             // Handle NoteLayer
+                //             // Add your note layer handling code here
+                //             break
+                //         default:
+                //             throw new Error(`Unknown layer type.`)
+                //     }
+                // })
+                ctxRef.current = ctx
+            }
+        }
+    }, [lineSize, windowWidth, windowHeight])
+    // }, [lineSize])
+
+    // useEffect(() => {
+    //     if (ctxRef.current) {
+    //         // Apply zoom to the canvas context
+    //         const ctx = ctxRef.current
+    //         ctx.setTransform(zoomLevel, 0, 0, zoomLevel, 0, 0)
+    //     }
+    //     console.log(zoomLevel)
+    // }, [zoomLevel])
+
+    const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        if (canvasState.mode === CanvasMode.Pencil) {
+            startNewPath(e, lineColor, lineSize)
+        } else {
+            startPan(e)
+        }
+    }
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        if (canvasState.mode === CanvasMode.Pencil) {
+            drawCurrentPath(e)
+        }
+    }
+
+    const handleMouseUp = () => {
+        if (canvasState.mode === CanvasMode.Pencil) {
+            finishCurrentPath()
+            setLayers([...layers, pathLayer])
+        }
+    }
+
+    return (
+        <main className="h-full w-full relative bg-neutral-100 touch-none">
+            <Toolbar
+                canvasState={canvasState}
+                setCanvasState={setCanvasState}
+                scale={scale}
+                canRedo={false}
+                canUndo={false}
+                undo={() => {}}
+                redo={() => {}}
+                // zoomLevel={zoomLevel}
+                // setZoomLevel={setZoomLevel}
+            />
+
+            {canvasState.mode === CanvasMode.Pencil && (
+                <PenMenu
+                    lineColor={lineColor}
+                    setLineColor={setLineColor}
+                    lineSize={lineSize}
+                    setLineSize={setLineSize}
+                />
+            )}
+
+            <canvas
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
+                ref={canvasRef}
+                // width={windowWidth * ratio}
+                // height={windowHeight * ratio}
+                // style={{
+                //     width: `${windowWidth}px`,
+                //     height: `${windowHeight}px`,
+                // }}
+            />
+        </main>
+    )
+}
