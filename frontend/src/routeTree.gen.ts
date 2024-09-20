@@ -119,15 +119,91 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren({
-  IndexLazyRoute,
-  RegisterRoute,
-  AboutLazyRoute,
-  ContactLazyRoute,
-  DrawLazyRoute,
-  FeaturesLazyRoute,
-  LoginLazyRoute,
-})
+export interface FileRoutesByFullPath {
+  '/': typeof IndexLazyRoute
+  '/register': typeof RegisterRoute
+  '/about': typeof AboutLazyRoute
+  '/contact': typeof ContactLazyRoute
+  '/draw': typeof DrawLazyRoute
+  '/features': typeof FeaturesLazyRoute
+  '/login': typeof LoginLazyRoute
+}
+
+export interface FileRoutesByTo {
+  '/': typeof IndexLazyRoute
+  '/register': typeof RegisterRoute
+  '/about': typeof AboutLazyRoute
+  '/contact': typeof ContactLazyRoute
+  '/draw': typeof DrawLazyRoute
+  '/features': typeof FeaturesLazyRoute
+  '/login': typeof LoginLazyRoute
+}
+
+export interface FileRoutesById {
+  __root__: typeof rootRoute
+  '/': typeof IndexLazyRoute
+  '/register': typeof RegisterRoute
+  '/about': typeof AboutLazyRoute
+  '/contact': typeof ContactLazyRoute
+  '/draw': typeof DrawLazyRoute
+  '/features': typeof FeaturesLazyRoute
+  '/login': typeof LoginLazyRoute
+}
+
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths:
+    | '/'
+    | '/register'
+    | '/about'
+    | '/contact'
+    | '/draw'
+    | '/features'
+    | '/login'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/register'
+    | '/about'
+    | '/contact'
+    | '/draw'
+    | '/features'
+    | '/login'
+  id:
+    | '__root__'
+    | '/'
+    | '/register'
+    | '/about'
+    | '/contact'
+    | '/draw'
+    | '/features'
+    | '/login'
+  fileRoutesById: FileRoutesById
+}
+
+export interface RootRouteChildren {
+  IndexLazyRoute: typeof IndexLazyRoute
+  RegisterRoute: typeof RegisterRoute
+  AboutLazyRoute: typeof AboutLazyRoute
+  ContactLazyRoute: typeof ContactLazyRoute
+  DrawLazyRoute: typeof DrawLazyRoute
+  FeaturesLazyRoute: typeof FeaturesLazyRoute
+  LoginLazyRoute: typeof LoginLazyRoute
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexLazyRoute: IndexLazyRoute,
+  RegisterRoute: RegisterRoute,
+  AboutLazyRoute: AboutLazyRoute,
+  ContactLazyRoute: ContactLazyRoute,
+  DrawLazyRoute: DrawLazyRoute,
+  FeaturesLazyRoute: FeaturesLazyRoute,
+  LoginLazyRoute: LoginLazyRoute,
+}
+
+export const routeTree = rootRoute
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
 
 /* prettier-ignore-end */
 
