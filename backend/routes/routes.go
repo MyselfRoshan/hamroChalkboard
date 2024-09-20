@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"backend/handlers"
 	"net/http"
 	"os"
 
@@ -23,8 +24,10 @@ func Routes() *echo.Echo {
 	mux.GET("/", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, `{"message": "Changing a type is the way to go is it not"}`)
 	})
-	// echojwt.JW
+	mux.POST("/register", handlers.RegisterHandler)
+	mux.POST("/login", handlers.LoginHandler)
 
+	// Restricted Routes
 	restricted := mux.Group("/restricted")
 	restricted.Use(echojwt.WithConfig(echojwt.Config{
 		SigningKey: []byte(os.Getenv("SECRET_KEY")),

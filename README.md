@@ -22,3 +22,7 @@
 -   Drawing App references (Next js Project): https://www.youtube.com/watch?v=ADJKbuayubE
 
 -   [x] Make tailwind css to work
+
+- [ ] JWT Authentication and Authorization
+- [ ] Database creation
+- [ ] Create aroom for real time socket communication to show the same drawing
