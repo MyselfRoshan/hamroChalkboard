@@ -1,11 +1,11 @@
 package services
 
 import (
+	"backend/models"
 	"errors"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
-	// "github.com/myapp/models"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type AuthService struct {
