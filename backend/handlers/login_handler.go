@@ -19,6 +19,11 @@ type JwtCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
+// Valid implements jwt.Claims.
+func (j *JwtCustomClaims) Valid() error {
+	panic("unimplemented")
+}
+
 func LoginHandler(c echo.Context) error {
 	emailOrUsername := c.FormValue("email_or_username")
 	password := c.FormValue("password")
@@ -31,8 +36,8 @@ func LoginHandler(c echo.Context) error {
 		log.Println("JWT_EXPIRATION is not a valid number; defaulting to 72 hours.")
 		JWT_EXPIRATION = 72
 	}
-	JWT_EXPIRATION_HOURS := time.Duration(JWT_EXPIRATION) * time.Hour
-	fmt.Println(JWT_EXPIRATION_HOURS)
+	JWT_EXPIRATION_HOURS := time.Duration(JWT_EXPIRATION) * time.Millisecond
+	// fmt.Println(JWT_EXPIRATION_HOURS)
 	claims := &JwtCustomClaims{
 		"test",
 		models.USER,

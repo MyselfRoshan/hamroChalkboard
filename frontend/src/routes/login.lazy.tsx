@@ -37,14 +37,18 @@ export default function LoginPage() {
       });
     },
     onSuccess: async (data) => {
-      console.log(await data.json());
-      console.log(data);
+      // console.log(await data.json());
+      // console.log(data);
       if (data.status === 401) {
         toast.error("Invalid credentials");
         return;
       }
       if (data.status === 200) {
         toast.success("Login successful");
+        const token = (await data.json()).token;
+        console.log(token);
+        document.cookie = `token=${token}; path=/; max-age=259200;`;
+        // window.location.href = "/";
       }
     },
     onError: () => {
@@ -143,9 +147,46 @@ export default function LoginPage() {
                   </a>
                 </div>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="flex flex-wrap gap-3">
                 <Button className="w-full" type="submit">
                   <LogIn className="mr-2 h-4 w-4" /> Sign In
+                </Button>
+                <Button
+                  className="w-full"
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    function getCookieValue(name: string) {
+                      const value = `; ${document.cookie}`;
+                      const parts = value.split(`; ${name}=`);
+                      if (parts.length === 2)
+                        return parts.pop()!.split(";").shift();
+                    }
+                    fetch("http://localhost:3333/restricted", {
+                      method: "GET",
+                      headers: {
+                        Authorization: `Bearer ${getCookieValue("token")}`,
+                      },
+                    })
+                      .then((response) => {
+                        if (!response.ok) {
+                          throw new Error("Network response was not ok");
+                        }
+                        console.log(response.text());
+                        // return response.json(); // or response.text() depending on your expected response
+                      })
+                      .then((data) => {
+                        console.log(data);
+                      })
+                      .catch((error) => {
+                        console.error(
+                          "There was a problem with the fetch operation:",
+                          error,
+                        );
+                      });
+                  }}
+                >
+                  <LogIn className="mr-2 h-4 w-4" /> Hit restricted api
                 </Button>
               </CardFooter>
             </form>
