@@ -8,7 +8,6 @@ export const Route = createRootRoute({
       <Outlet />
       <Notification position="top-center" />
       <TanStackRouterDevtools />
-      <ReactQueryDevtools initialIsOpen={false} />
       <ReactQueryDevtools buttonPosition="bottom-right" />
       {/* <TanStackRouterDevtools position="bottom-right" /> */}
     </>

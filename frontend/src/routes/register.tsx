@@ -1,7 +1,6 @@
-import { useMutation } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
-
-import { Button } from "components/ui/button";
+import { useMutation } from "@tanstack/react-query"
+import { createFileRoute, Link, redirect } from "@tanstack/react-router"
+import { Button } from "components/ui/button"
 import {
   Card,
   CardContent,
@@ -9,25 +8,35 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "components/ui/card";
-import { Checkbox } from "components/ui/checkbox";
-import { Input } from "components/ui/input";
-import { Label } from "components/ui/label";
-import { Eye, EyeOff, UserPlus } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
+} from "components/ui/card"
+import { Checkbox } from "components/ui/checkbox"
+import { Input } from "components/ui/input"
+import { Label } from "components/ui/label"
+import { Eye, EyeOff, UserPlus } from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
 import {
-  RegisterFormValues,
-  validationSchema as registerValidation,
-} from "src/utils/validation/registerValidation";
+  validationSchema as registerValidation
+} from "src/utils/validation/registerValidation"
+import { z } from "zod"
+
+const fallback = "/dashboard" as const
 
 export const Route = createFileRoute("/register")({
   component: () => <Register />,
-});
+  validateSearch: z.object({
+    redirect: z.string().optional().catch(''),
+  }),
+  beforeLoad: ({ context, search }) => {
+    if (context.auth.isAuthenticated) {
+      throw redirect({ to: search.redirect || fallback })
+    }
+  },
+})
 
 export default function Register() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   // use mutation for post, delete and update request
   // use query for get request
@@ -37,37 +46,36 @@ export default function Register() {
       return await fetch("http://localhost:3333/register", {
         method: "POST",
         body: data,
-      });
+      })
     },
     onSuccess: () => {
-      toast.success("Registered successfully");
+      toast.success("Registered successfully")
     },
     onError: () => {
-      toast.error("Failed to register user");
+      toast.error("Failed to register user")
     },
-  });
+  })
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.target as HTMLFormElement);
+    event.preventDefault()
+    const formData = new FormData(event.target as HTMLFormElement)
     const formValues = {
       username: formData.get("username") as string,
       email: formData.get("email") as string,
       password: formData.get("password") as string,
       confirmPassword: formData.get("confirm-password") as string,
-    };
+    }
 
     try {
-      await registerValidation.validate(formValues, { abortEarly: false });
-      await mutateAsync(formData);
+      await registerValidation.parseAsync(formValues)
+      await mutateAsync(formData)
     } catch (err: any) {
-      const firstError = err.inner[0];
-      // outline the errored input field
-      console.log(firstError.path as keyof RegisterFormValues);
+      const firstError = err.errors[0]
+      console.log(err)
 
-      toast.error(firstError.message);
+      toast.error(firstError.message)
     }
-  };
+  }
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4 text-foreground">
       <div className="flex w-full max-w-4xl flex-col overflow-hidden rounded-lg bg-register-image bg-contain shadow-xl md:flex-row">
@@ -127,7 +135,7 @@ export default function Register() {
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-[var(--input)]"
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-yellow-950/60 hover:text-yellow-950"
                       aria-label={
                         showPassword ? "Hide password" : "Show password"
                       }
@@ -155,7 +163,7 @@ export default function Register() {
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-[var(--input)]"
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-yellow-950/60 hover:text-yellow-950"
                       aria-label={
                         showConfirmPassword
                           ? "Hide confirm password"
@@ -200,5 +208,5 @@ export default function Register() {
         </div>
       </div>
     </div>
-  );
+  )
 }
