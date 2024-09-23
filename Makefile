@@ -22,8 +22,10 @@ logs:
 clean:
 	docker compose down -v --remove-orphans
 
+# frontend:
+# 	docker compose up --watch frontend
 frontend:
-	docker compose up --watch frontend
+	cd ./frontend && pnpm dev
 
 stop:
 	docker compose down

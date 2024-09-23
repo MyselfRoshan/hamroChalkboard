@@ -29,10 +29,10 @@ func Routes() *echo.Echo {
 	mux.POST("/login", handlers.LoginHandler)
 
 	// Restricted Routes
-	restricted := mux.Group("/restricted")
+	restricted := mux.Group("/authenticated")
 	config := echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
-			return new(handlers.JwtCustomClaims)
+			return new(handlers.JWTUserClaims)
 		},
 		SigningKey: []byte(os.Getenv("SECRET_KEY")),
 	}

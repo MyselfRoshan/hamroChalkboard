@@ -12,7 +12,8 @@ import (
 //	}
 func RestrictedHandler(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(*JwtCustomClaims)
-	name := claims.Name
-	return c.String(http.StatusOK, "Welcome "+name+"!")
+	claims := user.Claims.(*JWTUserClaims)
+	// name := claims.Name
+	return c.JSON(http.StatusOK, claims)
+	// return c.String(http.StatusOK, "Welcome "+name+"!")
 }
