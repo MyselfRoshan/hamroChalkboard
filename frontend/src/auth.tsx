@@ -1,77 +1,123 @@
-import * as React from "react"
-
-import { jwtDecode } from "jwt-decode"
-import { sleep } from "./utils/utils"
-
-export type AuthContext = {
-  isAuthenticated: boolean
-  login: (token: string) => Promise<void>
-  logout: () => Promise<void>
-  user: User | null
-}
+import { jwtDecode } from 'jwt-decode'
+import { createContext, useCallback, useContext, useState } from 'react'
+import { sleep } from './utils/utils'
 export enum Role {
-  USER = 0,
-  ADMIN = 1
+    USER = 0,
+    ADMIN = 1
 }
-
-const AuthContext = React.createContext<AuthContext | null>(null)
-
-const key = "auth.user"
-
-function getStoredUser() {
-  const user = localStorage.getItem(key)
-  return user ? jwtDecode<User>(user) : null
+export type User = {
+    exp: number
+    username: string
+    role: Role
 }
-
-function setStoredUser(user: string | null) {
-  if (user) {
-    localStorage.setItem(key, user)
-  } else {
-    localStorage.removeItem(key)
-  }
+export type AuthContext = {
+    isAuthenticated: boolean
+    login: (token: string) => Promise<void>
+    logout: () => Promise<void>
+    user: User | null,
+    fetch: Fetch
 }
+export type Fetch = (endPoint: RequestInfo | URL, config: RequestInit) => Promise<Response>
+const AuthContext = createContext<AuthContext | null>(null)
 
-type User = {
-  exp: number
-  username: string
-  role: Role
-}
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = React.useState<User | null>(getStoredUser())
-  const isAuthenticated = !!user
+    const [token, setToken] = useState<string | null>(null)
+    const [user, setUser] = useState<User | null>(null)
+    // const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true)
 
-  const logout = React.useCallback(async () => {
-    await sleep(250)
+    const login = useCallback(async (token: string) => {
+        await sleep(500)
 
-    setStoredUser(null)
-    setUser(null)
-  }, [])
+        setToken(token)
+        setUser(jwtDecode<User>(token))
+        setIsAuthenticated(true)
+    }, [])
 
-  const login = React.useCallback(async (token: string) => {
-    await sleep(500)
+    const logout = useCallback(async () => {
+        await sleep(250)
 
-    setStoredUser(token)
-    setUser(jwtDecode<User>(token))
-  }, [])
+        setToken(null)
+        setIsAuthenticated(false)
+    }, [])
 
-  React.useEffect(() => {
-    const storedUser = getStoredUser()
-    if (storedUser) {
-      setUser(storedUser)
+    const fetchAPIRequestInterceptor: Fetch = async (endPoint, config) => {
+        const headers = new Headers(config.headers)
+        headers.set('Authorization', `Bearer ${token}`)
+        config.headers = headers
+        config.method = 'GET'
+
+        try {
+            const response = await window.fetch(endPoint, config)
+            // https://www.youtube.com/watch?v=AcYF18oGn6Y
+            // console.log("before refresh_token")
+            if (response.status === 401 && response.statusText === "Unauthorized") {
+                // Refresh token
+                const refreshTokenResponse = await window.fetch('http://localhost:3333/refresh-token', {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+
+                    },
+                    credentials: 'include'
+
+                })
+                console.log(refreshTokenResponse)
+                // console.log("inside refresh_token")
+                if (refreshTokenResponse.ok) {
+                    const newToken = await refreshTokenResponse.json()
+                    console.log(newToken)
+
+                    setToken(newToken)
+                    // Retry the original request with the new token
+                    return window.fetch(endPoint, {
+                        method: 'GET',
+                        headers: {
+                            Authorization: `Bearer ${newToken}`,
+                        },
+                    })
+                } else {
+                    // setToken(null)
+                    throw new Error('Failed to refresh token')
+                }
+            }
+            return response
+        } catch (error) {
+            console.error('Error fetching data:', error)
+            throw error
+        }
     }
-  }, [])
 
-  return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  )
+    const fetch: Fetch = async (endPoint, config) => {
+        return fetchAPIRequestInterceptor(endPoint, config)
+        // if (isAuthenticated) {
+        //     return fetchAPIRequestInterceptor(endPoint, config)
+        // } else {
+        //     return window.fetch(endPoint, config)
+        // }
+    }
+
+    // useLayoutEffect(() => {
+    //     if (token) {
+    //         fetch("http://localhost:3333/refresh_token", {
+
+    //         })
+    //         setIsAuthenticated(true)
+    //     }
+    // }, [token])
+
+    return (
+        <AuthContext.Provider value={{ user, isAuthenticated, login, logout, fetch }}>
+            {children}
+        </AuthContext.Provider>
+    )
 }
 
+// export { AuthContext, AuthProvider }
 export function useAuth() {
-  const context = React.useContext(AuthContext)
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider")
-  }
-  return context
+    const context = useContext(AuthContext)
+    if (!context) {
+        throw new Error("useAuth must be used within an AuthProvider")
+    }
+    return context
 }

@@ -58,34 +58,36 @@ export default function LoginPage() {
       })
     },
     onSuccess: async (data) => {
-
       if (data.status === 401) {
         toast.error("Invalid credentials")
         return
       }
       if (data.status === 200) {
         toast.success("Signing in...")
-        await auth.login((await data.json()).token)
+        await auth.login((await data.json()).access_token)
         await router.invalidate()
 
         await sleep(1)
         await router.navigate({ to: search.redirect || fallback })
       }
     },
-    onError: () => {
+    onError: async (error, variables, context) => {
+      // console.log(error)
+      console.log(error, variables, context)
       toast.error("Login failed")
+
     },
   })
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const formData = new FormData(event.target as HTMLFormElement)
+    console.log(formData)
     const formValues = {
       email_or_username: formData.get("email_or_username") as string,
       password: formData.get("password") as string,
     }
 
     try {
-      // await loginValidation.validate(formValues, { abortEarly: false })
       await loginValidation.parseAsync(formValues)
       await mutateAsync(formData)
     } catch (err: any) {

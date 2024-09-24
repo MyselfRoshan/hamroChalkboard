@@ -5,7 +5,7 @@ import {
   useRouter,
 } from '@tanstack/react-router'
 
-import { useAuth } from '../../auth'
+import { useAuth } from '../../auth.tsx.bak'
 
 export const Route = createFileRoute('/(auth)/ball')({
   beforeLoad: ({ context, location }) => {
