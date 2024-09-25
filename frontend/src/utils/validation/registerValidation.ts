@@ -14,8 +14,8 @@ export const validationSchema = z
       .min(1, "Username is required.")
       .min(3, "Username must be at least 3 characters long.")
       .regex(
-        /^[a-zA-Z0-9]+$/,
-        "Username can only contain letters and numbers.",
+        /^[a-zA-Z][a-zA-Z0-9]*$/,
+        "Username can only be alphanumeric and start with a letter.",
       ),
     email: z
       .string()

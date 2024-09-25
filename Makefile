@@ -1,3 +1,9 @@
+#!make
+
+include .env
+
+DB_URL=postgresql://${DB_USER}:${DB_PASSWORD}@localhost:5432/${DB_NAME}?sslmode=disable
+
 .PHONY: help build logs frontend stop restartf api dbstart backend
 
 help:
@@ -34,9 +40,22 @@ restartf: stop frontend
 
 # BACKEND
 api:
-	cd ./backend && ./air
+	cd ./backend && air
 
 dbstart:
 	docker compose up hc_db hc_pgadmin -d
 
 backend: dbstart api
+
+# Migrations
+migrateUp:
+	migrate -path "${MIGRATION_PATH}" -database "${DB_URL}" -verbose up
+
+migrateDown:
+	migrate -path "${MIGRATION_PATH}" -database "${DB_URL}" -verbose down
+
+migrateForce:
+	migrate -path "${MIGRATION_PATH}" -database "${DB_URL}" force $(version)
+
+migrateCreate:
+	migrate create -ext sql -dir "${MIGRATION_PATH}" -seq $(fileName)

@@ -8,6 +8,8 @@ export const loginValidation = z.object({
     .string()
     .min(1, "Email or Username is required")
     .min(3, "Email or username must be at least 3 characters long"),
-  password: z.string().min(1, "Password is required."),
-  // .min(8, "Password must be at least 8 characters long"),
+  password: z
+    .string()
+    .min(1, "Password is required.")
+    .min(8, "Password must be at least 8 characters long"),
 });

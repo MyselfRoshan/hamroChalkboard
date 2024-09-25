@@ -5,7 +5,7 @@ import {
   redirect,
   useRouter
 } from "@tanstack/react-router"
-import { z } from "zod"
+import { z, ZodError } from "zod"
 
 
 import { Button } from "components/ui/button"
@@ -58,13 +58,16 @@ export default function LoginPage() {
       })
     },
     onSuccess: async (data) => {
+      console.log(data)
       if (data.status === 401) {
-        toast.error("Invalid credentials")
+        toast.error((await data.json()).error)
         return
       }
       if (data.status === 200) {
         toast.success("Signing in...")
-        await auth.login((await data.json()).access_token)
+        const token = (await data.json()).access_token
+        console.log(token)
+        await auth.login(token)
         await router.invalidate()
 
         await sleep(1)
@@ -73,15 +76,20 @@ export default function LoginPage() {
     },
     onError: async (error, variables, context) => {
       // console.log(error)
-      console.log(error, variables, context)
-      toast.error("Login failed")
+      // console.log(error, variables, context)
+      if (error.name === 'TypeError') {
 
+        console.log(error)
+        toast.error("Unable to connect to the server. Please check your internet connection and try again.")
+        return
+      }
+      toast.error("Login failed")
     },
   })
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const formData = new FormData(event.target as HTMLFormElement)
-    console.log(formData)
+    // console.log(formData)
     const formValues = {
       email_or_username: formData.get("email_or_username") as string,
       password: formData.get("password") as string,
@@ -90,10 +98,14 @@ export default function LoginPage() {
     try {
       await loginValidation.parseAsync(formValues)
       await mutateAsync(formData)
-    } catch (err: any) {
-      const firstError = err.errors[0]
-      console.log(err)
-      toast.error(firstError.message)
+    } catch (error: any) {
+      if (error instanceof ZodError) {
+        const firstError = error.errors[0]
+        toast.error(firstError.message)
+        return
+      }
+      // console.log(error, typeof error)
+      toast.error("Login failed")
     }
   }
 

@@ -23,8 +23,8 @@ const AuthContext = createContext<AuthContext | null>(null)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [token, setToken] = useState<string | null>(null)
     const [user, setUser] = useState<User | null>(null)
-    // const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true)
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
+    // const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true)
 
     const login = useCallback(async (token: string) => {
         await sleep(500)
@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (response.status === 401 && response.statusText === "Unauthorized") {
                 // Refresh token
                 const refreshTokenResponse = await window.fetch('http://localhost:3333/refresh-token', {
-                    method: 'POST',
+                    method: 'GET',
                     headers: {
                         Authorization: `Bearer ${token}`,
 
@@ -75,6 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                         headers: {
                             Authorization: `Bearer ${newToken}`,
                         },
+                        credentials: 'include'
                     })
                 } else {
                     // setToken(null)

@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query"
-import { createFileRoute, Link, redirect } from "@tanstack/react-router"
+import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router"
 import { Button } from "components/ui/button"
 import {
   Card,
@@ -15,6 +15,7 @@ import { Label } from "components/ui/label"
 import { Eye, EyeOff, UserPlus } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
+import { sleep } from "src/utils/utils"
 import {
   validationSchema as registerValidation
 } from "src/utils/validation/registerValidation"
@@ -35,6 +36,7 @@ export const Route = createFileRoute("/register")({
 })
 
 export default function Register() {
+  const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
@@ -48,10 +50,28 @@ export default function Register() {
         body: data,
       })
     },
-    onSuccess: () => {
-      toast.success("Registered successfully")
+    onSuccess: async (data) => {
+      if (data.status === 200) {
+        toast.success("Registered successfully")
+        await router.invalidate()
+
+        await sleep(1)
+        await router.navigate({ to: "/login" })
+      }
+      if (data.status === 400) {
+        toast.error("Failed to register user")
+      }
+
+      if (data.status === 401) {
+        toast.error("Invalid credentials")
+      }
+
+      if (data.status === 409) {
+        toast.error("User already exists")
+      }
+
     },
-    onError: () => {
+    onError: async () => {
       toast.error("Failed to register user")
     },
   })
@@ -71,7 +91,7 @@ export default function Register() {
       await mutateAsync(formData)
     } catch (err: any) {
       const firstError = err.errors[0]
-      console.log(err)
+      // console.log(err)
 
       toast.error(firstError.message)
     }
