@@ -65,25 +65,14 @@ export default function LoginPage() {
       }
       if (data.status === 200) {
         toast.success("Signing in...")
-        const token = (await data.json()).access_token
-        console.log(token)
-        await auth.login(token)
+        const { access_token } = await data.json()
+        console.log(access_token)
+        await auth.login(access_token)
         await router.invalidate()
 
         await sleep(1)
         await router.navigate({ to: search.redirect || fallback })
       }
-    },
-    onError: async (error, variables, context) => {
-      // console.log(error)
-      // console.log(error, variables, context)
-      if (error.name === 'TypeError') {
-
-        console.log(error)
-        toast.error("Unable to connect to the server. Please check your internet connection and try again.")
-        return
-      }
-      toast.error("Login failed")
     },
   })
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -99,13 +88,18 @@ export default function LoginPage() {
       await loginValidation.parseAsync(formValues)
       await mutateAsync(formData)
     } catch (error: any) {
+      if (error.name === 'TypeError') {
+        toast.error("Unable to connect to the server. Please check your internet connection and try again.")
+        return
+      }
       if (error instanceof ZodError) {
         const firstError = error.errors[0]
         toast.error(firstError.message)
         return
       }
-      // console.log(error, typeof error)
       toast.error("Login failed")
+      // console.log(error, typeof error)
+      // toast.error("Login failed")
     }
   }
 

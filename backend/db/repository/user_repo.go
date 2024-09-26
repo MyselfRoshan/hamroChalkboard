@@ -14,8 +14,10 @@ type UserRepository interface {
 	CreateUser(user *models.User) error
 	GetUserByID(id string) (*models.User, error)
 	GetUserByEmail(email string) (*models.User, error)
-	GetByEmailOrUsername(emailOrUsername string) (*models.User, error)
+	GetUserByUsername(username string) (*models.User, error)
+	GetUserByUsernameOrEmail(emailOrUsername string) (*models.User, error)
 	UpdateUser(user *models.User) error
+	UpdateUserRefreshToken(username string, refreshToken string) error
 	UpdateUserRefreshTokenAndLastLoginTime(id uuid.UUID, refreshToken string, lastLoginAt time.Time) error
 	DeleteUser(id string) error
 	GetAllUsers() ([]*models.User, error)
@@ -66,8 +68,24 @@ func (r *postgresDBRepo) GetUserByEmail(email string) (*models.User, error) {
 	return user, nil
 }
 
-// GetByEmailOrUsername retrieves a user by their email or username.
-func (r *postgresDBRepo) GetByEmailOrUsername(emailOrUsername string) (*models.User, error) {
+// GetUserByEmail retrieves a user by their username.
+func (r *postgresDBRepo) GetUserByUsername(username string) (*models.User, error) {
+	user := &models.User{}
+	query := `SELECT id, username, email, password, role, is_active, created_at, updated_at, last_login_at, refresh_token
+			  FROM users WHERE username=$1`
+
+	err := r.DB.QueryRow(query, username).Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Role, &user.IsActive, &user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt, &user.RefreshToken)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
+		log.Println("Error fetching user by username:", err)
+		return nil, err
+	}
+	return user, nil
+}
+
+// GetUserByUsernameOrEmail retrieves a user by their email or username.
+func (r *postgresDBRepo) GetUserByUsernameOrEmail(emailOrUsername string) (*models.User, error) {
 	user := &models.User{}
 	query := `SELECT id, username, email, password, role, is_active, created_at, updated_at, last_login_at, refresh_token
 			  FROM users WHERE email=$1 OR username=$2 LIMIT 1`
@@ -89,6 +107,17 @@ func (r *postgresDBRepo) UpdateUser(user *models.User) error {
 	_, err := r.DB.Exec(query, user.Username, user.Email, user.Password, user.Role, user.IsActive, user.UpdatedAt, user.LastLoginAt, user.RefreshToken, user.ID)
 	if err != nil {
 		log.Println("Error updating user:", err)
+	}
+	return err
+}
+
+// Update Refresh Token
+func (r *postgresDBRepo) UpdateUserRefreshToken(username string, refreshToken string) error {
+	query := `UPDATE users SET refresh_token=$1 WHERE username=$2`
+
+	_, err := r.DB.Exec(query, refreshToken, username)
+	if err != nil {
+		log.Println("Error updating user refresh token:", err)
 	}
 	return err
 }

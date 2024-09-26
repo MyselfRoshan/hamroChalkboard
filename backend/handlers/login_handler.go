@@ -3,10 +3,8 @@ package handlers
 import (
 	"backend/db/models"
 	"backend/helpers"
-	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -27,7 +25,7 @@ func (r *Repository) LoginHandler(c echo.Context) error {
 	emailOrUsername := c.FormValue("email_or_username")
 	password := c.FormValue("password")
 
-	user, _ := r.DB.GetByEmailOrUsername(emailOrUsername)
+	user, _ := r.DB.GetUserByUsernameOrEmail(emailOrUsername)
 	if user == nil {
 		return c.JSON(http.StatusUnauthorized, echo.Map{
 			"error": "Invalid email or username",
@@ -40,17 +38,12 @@ func (r *Repository) LoginHandler(c echo.Context) error {
 	}
 
 	// Create JWT claims
-	// JWT_EXPIRATION := r.Config.JWT_EXP * time.Minute
-	// For testing
-	JWT_EXPIRATION := r.Config.JWT_EXP * time.Second
-	fmt.Println(JWT_EXPIRATION)
 	accessClaims := &JWTUserClaims{
 		Username: user.Username,
 		Email:    user.Email,
 		Role:     user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(JWT_EXPIRATION)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(r.Config.JWT_EXP)),
 		},
 	}
 
@@ -59,21 +52,20 @@ func (r *Repository) LoginHandler(c echo.Context) error {
 		Email:    user.Email,
 		Role:     user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * 24 * time.Hour)),
+			// ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * 24 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute)),
 		},
 	}
 
 	// Generate Access Token
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
-	aT, err := accessToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	aT, err := accessToken.SignedString(r.Config.JWT_SECRET)
 	if err != nil {
 		return err
 	}
-	fmt.Println(os.Getenv("JWT_SECRET"))
 	// Generate Refresh Token
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
-	rT, err := refreshToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	rT, err := refreshToken.SignedString(r.Config.JWT_SECRET)
 	if err != nil {
 		return err
 	}

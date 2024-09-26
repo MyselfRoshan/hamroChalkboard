@@ -1,131 +1,92 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
 
-//	func (h *Handler) Login(c echo.Context) error {
-//		return c.String(http.StatusOK, "Login")
+//	func NewJWTConfig(cfg *config.AppConfig) echojwt.Config {
+//		return echojwt.Config{
+//			SigningKey:    []byte(cfg.JWT_SECRET),
+//			NewClaimsFunc: Repo.NewClaimsFunc,
+//			ErrorHandler:  Repo.RefreshHandler,
+//		}
 //	}
-func RestrictedHandler(c echo.Context) error {
-	user := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(*JWTUserClaims)
-	name := claims.Username
-	return c.String(http.StatusOK, "Welcome "+name+"!")
+func (r *Repository) NewClaimsFunc(c echo.Context) jwt.Claims {
+	return new(JWTUserClaims)
+}
+func (r *Repository) AccessTokenHandler(c echo.Context) error {
+	token := c.Get("user").(*jwt.Token)
+	claims := token.Claims.(*JWTUserClaims)
+	return c.JSON(http.StatusOK, echo.Map{
+		"payload": claims,
+	})
 }
 
-// func RefreshTokenHandler(c echo.Context) error {
-// 	// c.Response().G
-// 	// fmt.Println("claims", claims.ExpiresAt.Time)
-// 	// cookie, err := c.Cookie("refresh_token")
-// 	// if err != nil {
-// 	// 	return err
-// 	// }
-// 	// // if time.Now().After(claims.ExpiresAt.Time) {
-
-// 	// // }
-// 	// return c.JSON(http.StatusOK, cookie.Value)
-
-// 	cookie, err := c.Cookie("refresh_token")
-// 	if err != nil {
-// 		return echo.NewHTTPError(http.StatusUnauthorized, "No refresh token found")
-// 	}
-
-// 	// Validate the refresh token (here just checking if it exists)
-// 	if cookie.Value == "" {
-// 		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid refresh token")
-// 	}
-
-// 	// Generate new access token
-// 	// user := cookie.Value.(*jwt.Token)
-// 	token, err := jwt.ParseWithClaims(cookie.Value, &JWTUserClaims{}, func(token *jwt.Token) (interface{}, error) {
-// 		return []byte(os.Getenv("JWT_SECRET")), nil
-// 	})
-// 	if err != nil {
-// 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not generate access token")
-// 	}
-// 	refreshClaims := token.Claims.(*JWTUserClaims)
-// 	if token.Valid {
-// 		accessClaims := &JWTUserClaims{
-// 			Username: refreshClaims.Username,
-// 			Email:    refreshClaims.Email,
-// 			Role:     refreshClaims.Role,
-// 			RegisteredClaims: jwt.RegisteredClaims{
-// 				IssuedAt:  jwt.NewNumericDate(time.Now()),
-// 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * 60)),
-// 			},
-// 		}
-// 		accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
-// 		aT, err := accessToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
-// 		if err != nil {
-// 			return echo.NewHTTPError(http.StatusInternalServerError, "Could not generate access token")
-// 		}
-// 		return c.JSON(http.StatusOK, echo.Map{
-// 			"access_token": aT,
-// 		})
-// 	}
-// 	return echo.NewHTTPError(http.StatusInternalServerError, "Could not generate access token")
-
-// 	// return c.JSON(http.StatusInternalServerError, echo.Map{
-// 	// 	"message": "Invalid refresh token",
-// 	// })
-// }
-
-func RefreshTokenHandler(c echo.Context) error {
-	// Access the refresh token from the cookie
-	cookie, err := c.Cookie("refresh.token")
-	fmt.Println("cookie", cookie)
-	for _, cookie := range c.Cookies() {
-		fmt.Println(cookie.Name)
-		fmt.Println(cookie.Value)
-	}
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "No refresh token found")
-	}
-
-	// Validate the refresh token (you can also decode and verify it)
-	refreshToken := cookie.Value
-	if refreshToken == "" {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid refresh token")
-	}
-
-	// Parse the refresh token (this should include your verification logic)
-	claims := &JWTUserClaims{}
-	token, err := jwt.ParseWithClaims(refreshToken, claims, func(token *jwt.Token) (interface{}, error) {
-		// Ensure the signing method is what you expect
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Unexpected signing method")
+func (r *Repository) JWTErrorHandler(c echo.Context, err error) error {
+	if errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenInvalidClaims) {
+		username := c.QueryParam("username")
+		user, err := r.DB.GetUserByUsername(username)
+		fmt.Println(user, err)
+		if err != nil {
+			// Delete refresh token and logout user
+			log.Println("error while authenticating", err)
+			r.DB.UpdateUserRefreshToken(username, "")
+			return c.JSON(http.StatusUnauthorized, echo.Map{
+				"error": "error while authenticating",
+			})
 		}
-		return []byte(os.Getenv("JWT_SECRET")), nil
+		if !isValidToken(user.RefreshToken, r.Config.JWT_SECRET) {
+			// Delete refresh token and logout user
+			log.Println("refresh token expired or invalid")
+			r.DB.UpdateUserRefreshToken(username, "")
+			return c.JSON(http.StatusUnauthorized, echo.Map{
+				"error": "refresh token expired or invalid",
+			})
+		}
+
+		// Create new access token claims
+		newAccessClaims := &JWTUserClaims{
+			Username: user.Username,
+			Email:    user.Email,
+			Role:     user.Role,
+			RegisteredClaims: jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(r.Config.JWT_EXP)),
+			},
+		}
+
+		// Generate new access token
+		accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, newAccessClaims)
+		aT, err := accessToken.SignedString(r.Config.JWT_SECRET)
+		if err != nil {
+			log.Println("could not generate access token", err)
+			return c.JSON(http.StatusInternalServerError, echo.Map{
+				"error": "could not generate access token",
+			})
+		}
+
+		log.Println("refreshed token", aT)
+		return c.JSON(http.StatusCreated, echo.Map{
+			"access_token": aT,
+		})
+	}
+	return nil
+}
+
+func isValidToken(tokenString string, signingKey interface{}) bool {
+	claims := &JWTUserClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		// Ensure the token method is valid
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return signingKey, nil
 	})
-
-	if err != nil || !token.Valid {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid refresh token")
-	}
-
-	// Generate a new access token
-	accessClaims := &JWTUserClaims{
-		Username: claims.Username,
-		Email:    claims.Email,
-		Role:     claims.Role,
-		RegisteredClaims: jwt.RegisteredClaims{
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * 60)), // Your expiration time
-		},
-	}
-	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
-	a_t, err := accessToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, echo.Map{
-		"access_token": a_t,
-	})
+	return token.Valid && err == nil && token != nil
 }

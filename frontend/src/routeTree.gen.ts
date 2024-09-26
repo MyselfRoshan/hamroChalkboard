@@ -16,7 +16,6 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as RegisterImport } from './routes/register'
 import { Route as LoginImport } from './routes/login'
 import { Route as authDashboardImport } from './routes/(auth)/dashboard'
-import { Route as authBallImport } from './routes/(auth)/ball'
 
 // Create Virtual Routes
 
@@ -65,11 +64,6 @@ const IndexLazyRoute = IndexLazyImport.update({
 
 const authDashboardRoute = authDashboardImport.update({
   path: '/dashboard',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const authBallRoute = authBallImport.update({
-  path: '/ball',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -126,13 +120,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FeaturesLazyImport
       parentRoute: typeof rootRoute
     }
-    '/(auth)/ball': {
-      id: '/ball'
-      path: '/ball'
-      fullPath: '/ball'
-      preLoaderRoute: typeof authBallImport
-      parentRoute: typeof rootRoute
-    }
     '/(auth)/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -153,7 +140,6 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactLazyRoute
   '/draw': typeof DrawLazyRoute
   '/features': typeof FeaturesLazyRoute
-  '/ball': typeof authBallRoute
   '/dashboard': typeof authDashboardRoute
 }
 
@@ -165,7 +151,6 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactLazyRoute
   '/draw': typeof DrawLazyRoute
   '/features': typeof FeaturesLazyRoute
-  '/ball': typeof authBallRoute
   '/dashboard': typeof authDashboardRoute
 }
 
@@ -178,7 +163,6 @@ export interface FileRoutesById {
   '/contact': typeof ContactLazyRoute
   '/draw': typeof DrawLazyRoute
   '/features': typeof FeaturesLazyRoute
-  '/ball': typeof authBallRoute
   '/dashboard': typeof authDashboardRoute
 }
 
@@ -192,7 +176,6 @@ export interface FileRouteTypes {
     | '/contact'
     | '/draw'
     | '/features'
-    | '/ball'
     | '/dashboard'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -203,7 +186,6 @@ export interface FileRouteTypes {
     | '/contact'
     | '/draw'
     | '/features'
-    | '/ball'
     | '/dashboard'
   id:
     | '__root__'
@@ -214,7 +196,6 @@ export interface FileRouteTypes {
     | '/contact'
     | '/draw'
     | '/features'
-    | '/ball'
     | '/dashboard'
   fileRoutesById: FileRoutesById
 }
@@ -227,7 +208,6 @@ export interface RootRouteChildren {
   ContactLazyRoute: typeof ContactLazyRoute
   DrawLazyRoute: typeof DrawLazyRoute
   FeaturesLazyRoute: typeof FeaturesLazyRoute
-  authBallRoute: typeof authBallRoute
   authDashboardRoute: typeof authDashboardRoute
 }
 
@@ -239,7 +219,6 @@ const rootRouteChildren: RootRouteChildren = {
   ContactLazyRoute: ContactLazyRoute,
   DrawLazyRoute: DrawLazyRoute,
   FeaturesLazyRoute: FeaturesLazyRoute,
-  authBallRoute: authBallRoute,
   authDashboardRoute: authDashboardRoute,
 }
 
@@ -262,7 +241,6 @@ export const routeTree = rootRoute
         "/contact",
         "/draw",
         "/features",
-        "/ball",
         "/dashboard"
       ]
     },
@@ -286,9 +264,6 @@ export const routeTree = rootRoute
     },
     "/features": {
       "filePath": "features.lazy.tsx"
-    },
-    "/ball": {
-      "filePath": "(auth)/ball.tsx"
     },
     "/dashboard": {
       "filePath": "(auth)/dashboard.tsx"
