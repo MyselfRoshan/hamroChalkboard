@@ -1,54 +1,79 @@
 package handlers
 
 import (
-	"backend/models"
-	"fmt"
+	"backend/db/models"
+	"backend/helpers"
 	"log"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
 
-type JwtCustomClaims struct {
-	Name string      `json:"name"`
-	Role models.Role `json:"role"`
+type JWTUserClaims struct {
+	ID       int         `json:"id"`
+	Username string      `json:"username"`
+	Email    string      `json:"email"`
+	Role     models.Role `json:"role"`
 	jwt.RegisteredClaims
 }
 
-func LoginHandler(c echo.Context) error {
+// func (r *Repository) LoginHandler(c echo.Context) error {
+// func (r *Repository) LoginHandler(c echo.Context) error {
+func (r *Repository) LoginHandler(c echo.Context) error {
 	emailOrUsername := c.FormValue("email_or_username")
 	password := c.FormValue("password")
 
-	if emailOrUsername != "test" || password != "test" {
-		return echo.ErrUnauthorized
+	user, _ := r.DB.GetUserByUsernameOrEmail(emailOrUsername)
+	if user == nil {
+		return c.JSON(http.StatusUnauthorized, echo.Map{
+			"error": "Invalid email or username",
+		})
 	}
-	JWT_EXPIRATION, err := strconv.Atoi(os.Getenv("JWT_EXPIRATION"))
-	if err != nil {
-		log.Println("JWT_EXPIRATION is not a valid number; defaulting to 72 hours.")
-		JWT_EXPIRATION = 72
+	if !helpers.CheckPasswordHash(password, user.Password) {
+		return c.JSON(http.StatusUnauthorized, echo.Map{
+			"error": "Invalid password",
+		})
 	}
-	JWT_EXPIRATION_HOURS := time.Duration(JWT_EXPIRATION) * time.Hour
-	fmt.Println(JWT_EXPIRATION_HOURS)
-	claims := &JwtCustomClaims{
-		"test",
-		models.USER,
-		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(JWT_EXPIRATION_HOURS)),
+
+	// Create JWT claims
+	accessClaims := &JWTUserClaims{
+		Username: user.Username,
+		Email:    user.Email,
+		Role:     user.Role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(r.Config.JWT_EXP)),
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	t, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
-	fmt.Println(os.Getenv("SECRET_KEY"))
+	refreshClaims := &JWTUserClaims{
+		Username: user.Username,
+		Email:    user.Email,
+		Role:     user.Role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			// ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * 24 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute)),
+		},
+	}
+
+	// Generate Access Token
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
+	aT, err := accessToken.SignedString(r.Config.JWT_SECRET)
+	if err != nil {
+		return err
+	}
+	// Generate Refresh Token
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+	rT, err := refreshToken.SignedString(r.Config.JWT_SECRET)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"token": t,
+	r.DB.UpdateUserRefreshTokenAndLastLoginTime(user.ID, rT, time.Now())
+	log.Println("Saved Refresh Token in DB:", rT)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"access_token": aT,
 	})
 }

@@ -1,11 +1,14 @@
-import { useMutation } from "@tanstack/react-query";
-import { createLazyFileRoute, Link } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query"
+import {
+  createFileRoute,
+  Link,
+  redirect,
+  useRouter
+} from "@tanstack/react-router"
+import { z, ZodError } from "zod"
 
-export const Route = createLazyFileRoute("/login")({
-  component: () => <LoginPage />,
-});
 
-import { Button } from "components/ui/button";
+import { Button } from "components/ui/button"
 import {
   Card,
   CardContent,
@@ -13,20 +16,38 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "components/ui/card";
-import { Checkbox } from "components/ui/checkbox";
-import { Input } from "components/ui/input";
-import { Label } from "components/ui/label";
-import { Eye, EyeOff, LogIn } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
+} from "components/ui/card"
+import { Checkbox } from "components/ui/checkbox"
+import { Input } from "components/ui/input"
+import { Label } from "components/ui/label"
+import { Eye, EyeOff, LogIn } from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
+import { useAuth } from "src/auth"
+import { sleep } from "src/utils/utils"
 import {
-  LoginFormValues,
-  loginValidation,
-} from "src/utils/validation/loginValidation";
+  loginValidation
+} from "src/utils/validation/loginValidation"
+
+
+const fallback = "/dashboard" as const
+export const Route = createFileRoute("/login")({
+  component: () => <LoginPage />,
+  validateSearch: z.object({
+    redirect: z.string().optional().catch(''),
+  }),
+  beforeLoad: ({ context, search }) => {
+    if (context.auth.isAuthenticated) {
+      throw redirect({ to: search.redirect || fallback })
+    }
+  },
+})
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false);
+  const auth = useAuth()
+  const router = useRouter()
+  const search = Route.useSearch()
+  const [showPassword, setShowPassword] = useState(false)
 
   const { mutateAsync } = useMutation({
     mutationKey: ["login"],
@@ -34,40 +55,53 @@ export default function LoginPage() {
       return await fetch("http://localhost:3333/login", {
         method: "POST",
         body: data,
-      });
+      })
     },
     onSuccess: async (data) => {
-      console.log(await data.json());
-      console.log(data);
+      console.log(data)
       if (data.status === 401) {
-        toast.error("Invalid credentials");
-        return;
+        toast.error((await data.json()).error)
+        return
       }
       if (data.status === 200) {
-        toast.success("Login successful");
+        toast.success("Signing in...")
+        const { access_token } = await data.json()
+        console.log(access_token)
+        await auth.login(access_token)
+        await router.invalidate()
+
+        await sleep(1)
+        await router.navigate({ to: search.redirect || fallback })
       }
     },
-    onError: () => {
-      toast.error("Login failed");
-    },
-  });
+  })
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.target as HTMLFormElement);
+    event.preventDefault()
+    const formData = new FormData(event.target as HTMLFormElement)
+    // console.log(formData)
     const formValues = {
       email_or_username: formData.get("email_or_username") as string,
       password: formData.get("password") as string,
-    };
+    }
 
     try {
-      await loginValidation.validate(formValues, { abortEarly: false });
-      await mutateAsync(formData);
-    } catch (err: any) {
-      const firstError = err.inner[0];
-      // outline the errored input field
-      console.log(firstError.path as keyof LoginFormValues);
+      await loginValidation.parseAsync(formValues)
+      await mutateAsync(formData)
+    } catch (error: any) {
+      if (error.name === 'TypeError') {
+        toast.error("Unable to connect to the server. Please check your internet connection and try again.")
+        return
+      }
+      if (error instanceof ZodError) {
+        const firstError = error.errors[0]
+        toast.error(firstError.message)
+        return
+      }
+      toast.error("Login failed")
+      // console.log(error, typeof error)
+      // toast.error("Login failed")
     }
-  };
+  }
 
   return (
     <div className="grid min-h-screen place-items-center bg-background p-4 text-foreground">
@@ -83,12 +117,29 @@ export default function LoginPage() {
         <div className="flex w-full flex-col justify-center bg-card/30 p-8 backdrop-blur-[3rem] md:w-1/2">
           <Card className="border-none bg-transparent">
             <CardHeader>
-              <CardTitle className="text-2xl font-bold text-primary">
-                Welcome Back
-              </CardTitle>
-              <CardDescription className="text-white">
-                Enter your credentials to access your account.
-              </CardDescription>
+              {
+                search.redirect ? (
+                  <>
+                    <CardTitle className="text-2xl font-bold text-primary">
+                      Login
+                    </CardTitle>
+                    <CardDescription className="text-red-900 font-black">
+                      You need to login to access this page
+                    </CardDescription>
+                  </>
+
+                ) : (
+                  <>
+                    <CardTitle className="text-2xl font-bold text-primary">
+                      Welcome Back
+                    </CardTitle>
+                    <CardDescription className="text-white">
+                      Enter your credentials to access your account.
+                    </CardDescription>
+                  </>
+
+                )
+              }
             </CardHeader>
             <form onSubmit={handleSubmit}>
               <CardContent className="space-y-4">
@@ -117,7 +168,7 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-[var(--input)]"
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-yellow-950/60 hover:text-yellow-950"
                       aria-label={
                         showPassword ? "Hide password" : "Show password"
                       }
@@ -143,10 +194,11 @@ export default function LoginPage() {
                   </a>
                 </div>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="flex flex-wrap gap-3">
                 <Button className="w-full" type="submit">
                   <LogIn className="mr-2 h-4 w-4" /> Sign In
                 </Button>
+
               </CardFooter>
             </form>
           </Card>
@@ -159,5 +211,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

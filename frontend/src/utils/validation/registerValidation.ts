@@ -1,5 +1,4 @@
-import * as Yup from "yup";
-
+import { z } from "zod";
 export type RegisterFormValues = {
   username: string;
   email: string;
@@ -7,19 +6,29 @@ export type RegisterFormValues = {
   confirmPassword: string;
 };
 
-export const validationSchema = Yup.object().shape({
-  username: Yup.string()
-    .required("Username is required.")
-    .min(3, "Username must be at least 3 characters long.")
-    .matches(
-      /^[a-zA-Z0-9]+$/,
-      "Username can only contain letters and numbers.",
-    ),
-  email: Yup.string().required("Email is required.").email("Email is invalid."),
-  password: Yup.string()
-    .required("Password is required.")
-    .min(8, "Password must be at least 6 characters long."),
-  confirmPassword: Yup.string()
-    .required("Confirm Password is required.")
-    .oneOf([Yup.ref("password"), ""], "Passwords must match."),
-});
+export const validationSchema = z
+  .object({
+    username: z
+      .string()
+      .trim()
+      .min(1, "Username is required.")
+      .min(3, "Username must be at least 3 characters long.")
+      .regex(
+        /^[a-zA-Z][a-zA-Z0-9]*$/,
+        "Username can only be alphanumeric and start with a letter.",
+      ),
+    email: z
+      .string()
+      .trim()
+      .min(1, "Email is required.")
+      .email("Email is invalid."),
+    password: z
+      .string()
+      .min(1, "Password is required.")
+      .min(8, "Password must be at least 8 characters long."),
+    confirmPassword: z.string().min(1, "Confirm Password is required."),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });

@@ -23,6 +23,11 @@
 
 -   [x] Make tailwind css to work
 
-- [ ] JWT Authentication and Authorization
-- [ ] Database creation
-- [ ] Create aroom for real time socket communication to show the same drawing
+-   [ ] JWT Authentication and Authorization
+    > -   [ ] Token Generation
+    > -   [ ] Token Validation
+    > -   [ ] Token Refresh
+    > -   [backend](https://www.youtube.com/watch?v=XqVR7BYVdwk&list=PL0wd2rfixHH1sb_8qx9WIVkj7uhCwCgM9&index=12)
+    > -   [frontend](https://www.youtube.com/watch?v=vq-HfDKVRbc&list=PL0wd2rfixHH1sb_8qx9WIVkj7uhCwCgM9&index=13)
+-   [ ] Database creation
+-   [ ] Create aroom for real time socket communication to show the same drawing
