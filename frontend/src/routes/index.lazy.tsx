@@ -7,8 +7,12 @@ import Header from "src/components/Header"
 export const Route = createLazyFileRoute("/")({
   component: () => <LandingPage />,
 })
+})
 
 function LandingPage() {
+
+
+  const [scrollY, setScrollY] = useState(0)
 
 
   const [scrollY, setScrollY] = useState(0)
@@ -175,11 +179,16 @@ function LandingPage() {
       </footer>
     </div>
   )
+  )
 }
 type FeatureCardProps = {
   icon: LucideIcon
   title: string
   description: string
+}
+icon: LucideIcon
+title: string
+description: string
 }
 
 function FeatureCard({ icon: Icon, title, description }: FeatureCardProps) {
@@ -191,5 +200,6 @@ function FeatureCard({ icon: Icon, title, description }: FeatureCardProps) {
       <h4 className="mb-2 text-xl font-semibold text-yellow-800">{title}</h4>
       <p className="text-gray-600">{description}</p>
     </div>
+  )
   )
 }

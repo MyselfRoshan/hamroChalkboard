@@ -2,6 +2,7 @@ package routes
 
 import (
 	"backend/config"
+	"backend/config"
 	"backend/handlers"
 	"net/http"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
+func Routes(cfg *config.AppConfig) *echo.Echo {
 func Routes(cfg *config.AppConfig) *echo.Echo {
 	mux := echo.New()
 
