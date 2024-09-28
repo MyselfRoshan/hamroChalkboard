@@ -24,6 +24,7 @@ import { Eye, EyeOff, LogIn } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { useAuth } from "src/auth"
+import { AUTH_URL } from "src/utils/constants"
 import { sleep } from "src/utils/utils"
 import {
   loginValidation
@@ -48,11 +49,13 @@ export default function LoginPage() {
   const router = useRouter()
   const search = Route.useSearch()
   const [showPassword, setShowPassword] = useState(false)
+  console.log(AUTH_URL)
 
   const { mutateAsync } = useMutation({
     mutationKey: ["login"],
     mutationFn: async (data: FormData) => {
-      return await fetch("http://localhost:3333/login", {
+      // return await fetch("http://localhost:3333/login", {
+      return await fetch(AUTH_URL, {
         method: "POST",
         body: data,
       })

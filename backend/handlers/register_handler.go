@@ -34,8 +34,6 @@ func (r *Repository) RegisterHandler(c echo.Context) error {
 		Role:      models.USER,            // Assuming USER is a predefined role
 		IsActive:  true,
 		CreatedAt: time.Now(),
-		// UpdatedAt:   models.KNullTime{},
-		// LastLoginAt: models.NullTime{},
 	}
 
 	// Insert the user into the database
@@ -50,13 +48,13 @@ func (r *Repository) RegisterHandler(c echo.Context) error {
 				})
 			}
 			log.Println("Failed to register user:", err)
-			return c.JSON(http.StatusInternalServerError, echo.Map{
+			return echo.NewHTTPError(http.StatusInternalServerError, echo.Map{
 				"error": "Failed to register user",
 			})
 		}
 	}
 
-	log.Println("Registered User", user)
+	log.Printf("Registered User %v\n", user)
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "Registration successful",
 		"name":    username,

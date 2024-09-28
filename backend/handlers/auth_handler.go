@@ -1,11 +1,10 @@
 package handlers
 
 import (
+	"backend/db/models"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
@@ -19,11 +18,11 @@ import (
 //		}
 //	}
 func (r *Repository) NewClaimsFunc(c echo.Context) jwt.Claims {
-	return new(JWTUserClaims)
+	return new(models.UserClaims)
 }
 func (r *Repository) AccessTokenHandler(c echo.Context) error {
 	token := c.Get("user").(*jwt.Token)
-	claims := token.Claims.(*JWTUserClaims)
+	claims := token.Claims.(*models.UserClaims)
 	return c.JSON(http.StatusOK, echo.Map{
 		"payload": claims,
 	})
@@ -33,13 +32,13 @@ func (r *Repository) JWTErrorHandler(c echo.Context, err error) error {
 	if errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenInvalidClaims) {
 		username := c.QueryParam("username")
 		user, err := r.DB.GetUserByUsername(username)
-		fmt.Println(user, err)
+		log.Println(user, err)
 		if err != nil {
 			// Delete refresh token and logout user
-			log.Println("error while authenticating", err)
+			log.Println("error while authenticating ", err)
 			r.DB.UpdateUserRefreshToken(username, "")
 			return c.JSON(http.StatusUnauthorized, echo.Map{
-				"error": "error while authenticating",
+				"error": "Error while authenticating.",
 			})
 		}
 		if !isValidToken(user.RefreshToken, r.Config.JWT_SECRET) {
@@ -47,46 +46,40 @@ func (r *Repository) JWTErrorHandler(c echo.Context, err error) error {
 			log.Println("refresh token expired or invalid")
 			r.DB.UpdateUserRefreshToken(username, "")
 			return c.JSON(http.StatusUnauthorized, echo.Map{
-				"error": "refresh token expired or invalid",
+				"error": "Your session has expired or is invalid. ",
 			})
-		}
-
-		// Create new access token claims
-		newAccessClaims := &JWTUserClaims{
-			Username: user.Username,
-			Email:    user.Email,
-			Role:     user.Role,
-			RegisteredClaims: jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(r.Config.JWT_EXP)),
-			},
 		}
 
 		// Generate new access token
-		accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, newAccessClaims)
-		aT, err := accessToken.SignedString(r.Config.JWT_SECRET)
+		// accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, newAccessClaims)
+		// aT, err := accessToken.SignedString(r.Config.JWT_SECRET)
+		accessToken, accessPayload, err := user.NewUserToken(r.Config.JWT_SECRET, r.Config.JWT_EXP)
 		if err != nil {
 			log.Println("could not generate access token", err)
 			return c.JSON(http.StatusInternalServerError, echo.Map{
-				"error": "could not generate access token",
+				"error": "error while authenticating.",
 			})
 		}
 
-		log.Println("refreshed token", aT)
+		log.Println("refreshed token", accessToken)
 		return c.JSON(http.StatusCreated, echo.Map{
-			"access_token": aT,
+			"token":   accessToken,
+			"payload": accessPayload,
 		})
 	}
 	return nil
 }
 
 func isValidToken(tokenString string, signingKey interface{}) bool {
-	claims := &JWTUserClaims{}
+	claims := &models.UserClaims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		// Ensure the token method is valid
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			log.Println("Unexpected signing method")
 			return nil, errors.New("unexpected signing method")
 		}
 		return signingKey, nil
 	})
+	log.Println("Refresh token details in invalid function", token, err)
 	return token.Valid && err == nil && token != nil
 }

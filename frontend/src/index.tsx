@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { RouterProvider, createRouter } from "@tanstack/react-router"
 import ReactDOM from "react-dom/client"
 // Import the generated route tree
+import { StrictMode } from "react"
 import { AuthProvider, useAuth } from "./auth.tsx"
 import "./index.css"
 import { routeTree } from "./routeTree.gen"
@@ -30,19 +31,21 @@ declare module "@tanstack/react-router" {
 function App() {
   const auth = useAuth()
   return <RouterProvider router={router} context={{ auth }} />
+
 }
 
 // Render the app
 const rootElement = document.getElementById("root")!
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
+  // console.log(import.meta.env.PUBLIC_API_PREFIX)
   root.render(
-    // <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </QueryClientProvider>
-    // </StrictMode>,
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </QueryClientProvider>
+    </StrictMode>,
   )
 }

@@ -14,6 +14,7 @@ export type HintProps = {
     sideOffset?: number
     alignOffset?: number
     open?: boolean
+    disable?: boolean
 }
 export default function Hint({
     label,
@@ -23,21 +24,21 @@ export default function Hint({
     sideOffset,
     alignOffset,
     open,
+    disable = false
 }: HintProps) {
-    return (
-        <TooltipProvider>
-            <Tooltip delayDuration={100} open={open}>
-                <TooltipTrigger asChild>{children}</TooltipTrigger>
-                <TooltipContent
-                    className="text-white bg-black border-black"
-                    side={side}
-                    align={align}
-                    sideOffset={sideOffset}
-                    alignOffset={alignOffset}
-                >
-                    <p className="font-semibold capitalize">{label}</p>
-                </TooltipContent>
-            </Tooltip>
-        </TooltipProvider>
-    )
+    return <TooltipProvider >
+        <Tooltip delayDuration={100} open={open}>
+            <TooltipTrigger asChild>{children}</TooltipTrigger>
+            <TooltipContent
+                hidden={disable}
+                className={"text-white bg-black border-black"}
+                side={side}
+                align={align}
+                sideOffset={sideOffset}
+                alignOffset={alignOffset}
+            >
+                <span className="font-semibold capitalize">{label}</span>
+            </TooltipContent>
+        </Tooltip>
+    </TooltipProvider>
 }

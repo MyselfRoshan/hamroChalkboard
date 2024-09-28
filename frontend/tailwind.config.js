@@ -76,6 +76,16 @@ module.exports = {
           "url('https://images.pexels.com/photos/4585185/pexels-photo-4585185.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1')",
         "register-image":
           "url('https://images.pexels.com/photos/137594/pexels-photo-137594.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1')",
+        // "dashboard-image": "url('public/assets/12158314_1920_1080_30fps.mp4')",
+        "dashboard-image":
+          "url('public/assets/images/boston-public-library-YoK5pBcSY8s-unsplash.jpg')",
+      },
+      gridTemplateRows: {
+        "side-bar": "auto auto 1fr",
+      },
+      gridTemplateColumns: {
+        "dashboard-opened": "16rem auto",
+        "dashboard-closed": "auto 1fr",
       },
     },
   },
