@@ -11,7 +11,7 @@ import {
     Undo2,
 } from "lucide-react"
 import useKeyboardShortcuts from "src/hooks/useKeyboardShortcuts"
-import ToolButton from "./ToolButton"
+import FlexibleButton from "./FlexibleButton"
 
 type ToolbarProps = {
     // canvasState: CanvasState
@@ -85,7 +85,7 @@ export default function Toolbar({
         <>
             <div className="absolute top-[50%] right-2 bg-white rounded-md p-1.5 grid gap-y-1 items-center shadow-md">
                 {modeButtons.map(btn => (
-                    <ToolButton
+                    <FlexibleButton
                         key={btn.mode}
                         label={btn.label}
                         icon={btn.icon}
@@ -95,7 +95,7 @@ export default function Toolbar({
                 ))}
             </div>
             <div className="absolute bottom-2 right-2 bg-white rounded-md p-1.5 flex gap-1 shadow-md">
-                <ToolButton
+                <FlexibleButton
                     label="Undo"
                     side="top"
                     icon={Undo2}
@@ -103,7 +103,7 @@ export default function Toolbar({
                     onClick={undo}
                     isDisabled={canUndo}
                 />
-                <ToolButton
+                <FlexibleButton
                     label="Undo"
                     side="top"
                     icon={Redo2}

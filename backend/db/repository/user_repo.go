@@ -18,7 +18,7 @@ type UserRepository interface {
 	GetUserByUsernameOrEmail(emailOrUsername string) (*models.User, error)
 	UpdateUser(user *models.User) error
 	UpdateUserRefreshToken(username string, refreshToken string) error
-	UpdateUserRefreshTokenAndLastLoginTime(id uuid.UUID, refreshToken string, lastLoginAt time.Time) error
+	UpdateUserRefreshTokenAndLastLoginTime(id uuid.UUID, refreshToken string) error
 	DeleteUser(id string) error
 	GetAllUsers() ([]*models.User, error)
 }
@@ -123,9 +123,9 @@ func (r *postgresDBRepo) UpdateUserRefreshToken(username string, refreshToken st
 }
 
 // Update Refresh Token and Last Login Time
-func (r *postgresDBRepo) UpdateUserRefreshTokenAndLastLoginTime(id uuid.UUID, refreshToken string, lastLoginAt time.Time) error {
+func (r *postgresDBRepo) UpdateUserRefreshTokenAndLastLoginTime(id uuid.UUID, refreshToken string) error {
+	lastLoginAt := time.Now()
 	query := `UPDATE users SET refresh_token=$1, last_login_at=$2 WHERE id=$3`
-
 	_, err := r.DB.Exec(query, refreshToken, lastLoginAt, id)
 	if err != nil {
 		log.Println("Error updating user refresh token and last login time:", err)

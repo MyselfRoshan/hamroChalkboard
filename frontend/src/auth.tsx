@@ -16,7 +16,8 @@ export type AuthContext = {
     login: (token: string) => Promise<void>
     logout: () => Promise<void>
     user: User | null,
-    authFetch: Fetch
+    authFetch: Fetch,
+    token: string | null
 }
 export type Fetch = (endPoint: RequestInfo | URL, config: RequestInit) => Promise<Response>
 const AuthContext = createContext<AuthContext | null>(null)
@@ -40,9 +41,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(getStoredUser())
     const isAuthenticated = !!user
 
-    const login = useCallback(async (token: string) => {
+    const login = useCallback(async ({ token, payload }: { token: string, payload: User }) => {
         setStoredToken(token)
-        setUser(jwtDecode<User>(token))
+        setUser(payload)
     }, [])
 
     const logout = useCallback(async () => {
@@ -136,7 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }, [login, logout]
     )
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated, login, logout, authFetch }}>
+        <AuthContext.Provider value={{ user, isAuthenticated, login, logout, authFetch, token: getStoredToken() }}>
             {children}
         </AuthContext.Provider>
     )

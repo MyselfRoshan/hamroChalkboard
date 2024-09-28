@@ -25,6 +25,8 @@ type AppConfig struct {
 func LoadConfig() AppConfig {
 	// load .env file
 	if err := godotenv.Load("../.env"); err != nil {
+		// for testing
+		// if err := godotenv.Load("../../.env"); err != nil {
 		log.Fatalf("failed to loaed .env file")
 		panic(err)
 	}
@@ -39,6 +41,9 @@ func LoadConfig() AppConfig {
 		JWT_SECRET:  getByteArrayEnv("JWT_SECRET", "secret"),
 		JWT_EXP:     getDurationEnv("JWT_EXPIRATION", 15, time.Minute),
 		SESSION_EXP: getDurationEnv("SESSION_EXPIRATION", 30, 24*time.Hour),
+		// For Testing
+		// JWT_EXP:     getDurationEnv("JWT_EXPIRATION", 15, time.Second),
+		// SESSION_EXP: getDurationEnv("SESSION_EXPIRATION", 30, time.Minute),
 	}
 }
 

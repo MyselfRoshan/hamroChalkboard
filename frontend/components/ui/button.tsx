@@ -18,6 +18,7 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        "dropdown-menu": "w-full text-left justify-start bg-transparent",
         bord: "hover:bg-yellow-500/20 hover:text-yellow-800",
         bordActive: "bg-yellow-500/20 text-yellow-800",
       },
@@ -26,6 +27,7 @@ const buttonVariants = cva(
         sm: "h-9 rounded-md px-3",
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
+        auto: "h-auto py-1"
       },
     },
     defaultVariants: {

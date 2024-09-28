@@ -6,6 +6,7 @@ import { useMutation } from '@tanstack/react-query'
 import { Button } from "components/ui/button"
 import {
     Dialog,
+    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
@@ -13,17 +14,20 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "components/ui/dialog"
+import { LogOut } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function Logout() {
-    const { logout, user } = useAuth()
+    const { logout, token } = useAuth()
     const router = useRouter()
     const navigate = Route.useNavigate()
     const mutate = useMutation({
         mutationFn: async () => {
-            return fetch("http://localhost:3333/logout", {
+            return fetch("http://localhost:3333/auth", {
                 method: "DELETE",
-                body: user?.username
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
             })
         },
         onSuccess: async (data) => {
@@ -48,28 +52,34 @@ export default function Logout() {
     }
     // mutate.isPending ? toast.info("Logging out...") : null
     return (
-        <>
-            <Dialog>
-                <DialogTrigger asChild>
-                    <Button variant="ghost" className='mr-4 inline-flex h-11 items-center justify-center whitespace-nowrap rounded-md bg-yellow-500 px-8 text-sm font-medium text-white ring-offset-background transition-colors hover:bg-yellow-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50'>
-                        {/* <Button variant="destructive" > */}
-                        Logout
-                    </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Logout</DialogTitle>
-                        <DialogDescription>
-                            Are you sure you want to logout?
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="dropdown-menu"
+                    // className=''
+                    // defaultlyOpen
+                    // className='mr-4 bg-yellow-500 text-white hover:bg-yellow-700'
+                    // size="lg"
+                    size="auto"
+                >
+                    <LogOut className='mr-2 h-4 w-4' />
+                    Logout
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Logout</DialogTitle>
+                    <DialogDescription>
+                        Are you sure you want to logout?
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                    <DialogClose asChild>
                         <Button variant="outline" className='hover:bg-white bg-transparent text-white'>No</Button>
-                        <Button type="submit" variant="destructive" className='hover:bg-red-600' onClick={handleLogout}>Yes</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                    </DialogClose>
+                    <Button type="submit" variant="destructive" className='hover:bg-red-600' onClick={handleLogout}>Yes</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
 
-        </>
     )
 }
