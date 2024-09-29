@@ -2,16 +2,16 @@ package routes
 
 import (
 	"backend/config"
-	"backend/config"
 	"backend/handlers"
+	"log"
 	"net/http"
+	"net/url"
 
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func Routes(cfg *config.AppConfig) *echo.Echo {
 func Routes(cfg *config.AppConfig) *echo.Echo {
 	mux := echo.New()
 
@@ -36,20 +36,26 @@ func Routes(cfg *config.AppConfig) *echo.Echo {
 	}
 	// Routes
 	api := mux.Group("")
-	api.POST("/register", handlers.Repo.RegisterHandler)
-	api.POST("/auth", handlers.Repo.LoginHandler)
+	api.POST("/register", handlers.Repo.HandlePostRegister)
+	api.POST("/auth", handlers.Repo.HandlePostAuth)
 
 	// Auth Routes
-	authApi := api.Group("")
+	authBaseUrl, err := url.JoinPath(cfg.API_PREFIX, cfg.API_VERSION)
+	if err != nil {
+		log.Fatalf("Error getting api url")
+	}
+	authApi := api.Group(authBaseUrl)
 	config := echojwt.Config{
 		NewClaimsFunc: handlers.Repo.NewClaimsFunc,
 		SigningKey:    cfg.JWT_SECRET,
 		ErrorHandler:  handlers.Repo.JWTErrorHandler,
 	}
 	authApi.Use(echojwt.WithConfig(config))
-	// restricted.Use(echojwt.WithConfig(handlers.NewJWTConfig(cfg)))
-	authApi.POST("/access-token", handlers.Repo.AccessTokenHandler)
-	authApi.DELETE("/auth", handlers.Repo.LogoutHandler)
+	authApi.POST("/token", handlers.Repo.HandlePostToken)
+	authApi.DELETE("/auth", handlers.Repo.HandleDeleteAuth)
+
+	authApi.GET("/room", handlers.Repo.HandleGetRooms)
+	authApi.POST("/room", handlers.Repo.HandlePostRoom)
 	// mux.POST("/refresh-token", handlers.Repo.RefreshTokenHandler)
 	// restricted.POST("/refresh-token", handlers.RefreshTokenHandler)
 	// restricted.GET("/refresh-token", handlers.RefreshTokenHandler)

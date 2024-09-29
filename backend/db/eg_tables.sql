@@ -11,7 +11,7 @@ CREATE TABLE participants (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     room_id UUID REFERENCES rooms(id) ON DELETE CASCADE, -- Foreign key to rooms
     user_id UUID REFERENCES users(id) ON DELETE CASCADE, -- Foreign key to users
-    joined_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    joined_at TIMESTAMPTZ,
     left_at TIMESTAMPTZ
 );
 

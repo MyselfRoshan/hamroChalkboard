@@ -84,7 +84,7 @@ module.exports = {
         "side-bar": "auto auto 1fr",
       },
       gridTemplateColumns: {
-        "dashboard-opened": "16rem auto",
+        "dashboard-opened": "16rem 1fr",
         "dashboard-closed": "auto 1fr",
       },
     },

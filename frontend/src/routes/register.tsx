@@ -1,6 +1,11 @@
-import { useMutation } from "@tanstack/react-query"
-import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router"
-import { Button } from "components/ui/button"
+import { useMutation } from "@tanstack/react-query";
+import {
+  createFileRoute,
+  Link,
+  redirect,
+  useRouter,
+} from "@tanstack/react-router";
+import { Button } from "components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,94 +13,92 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "components/ui/card"
-import { Checkbox } from "components/ui/checkbox"
-import { Input } from "components/ui/input"
-import { Label } from "components/ui/label"
-import { Eye, EyeOff, UserPlus } from "lucide-react"
-import { useState } from "react"
-import { toast } from "sonner"
-import { sleep } from "src/utils/utils"
-import {
-  validationSchema as registerValidation
-} from "src/utils/validation/registerValidation"
-import { z } from "zod"
+} from "components/ui/card";
+import { Checkbox } from "components/ui/checkbox";
+import { Input } from "components/ui/input";
+import { Label } from "components/ui/label";
+import { Eye, EyeOff, UserPlus } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { REGISTER_URL } from "src/utils/constants";
+import { sleep } from "src/utils/utils";
+import { validationSchema as registerValidation } from "src/utils/validation/registerValidation";
+import { z } from "zod";
 
-const fallback = "/dashboard" as const
+const fallback = "/dashboard" as const;
 
 export const Route = createFileRoute("/register")({
   component: () => <Register />,
   validateSearch: z.object({
-    redirect: z.string().optional().catch(''),
+    redirect: z.string().optional().catch(""),
   }),
   beforeLoad: ({ context, search }) => {
     if (context.auth.isAuthenticated) {
-      throw redirect({ to: search.redirect || fallback })
+      throw redirect({ to: search.redirect || fallback });
     }
   },
-})
+});
 
 export default function Register() {
-  const router = useRouter()
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // use mutation for post, delete and update request
   // use query for get request
   const { mutateAsync } = useMutation({
     mutationKey: ["register"],
     mutationFn: async (data: FormData) => {
-      return await fetch("http://localhost:3333/register", {
+      return await fetch(REGISTER_URL, {
         method: "POST",
         body: data,
-      })
+      });
     },
     onSuccess: async (data) => {
       if (data.status === 200) {
-        toast.success("Registered successfully")
-        await router.invalidate()
+        toast.success("Registered successfully");
+        await router.invalidate();
 
-        await sleep(1)
-        await router.navigate({ to: "/login" })
+        await sleep(1);
+        await router.navigate({ to: "/login" });
       }
       if (data.status === 400) {
-        toast.error("Failed to register user")
+        toast.error("Failed to register user");
       }
 
       if (data.status === 401) {
-        toast.error("Invalid credentials")
+        toast.error("Invalid credentials");
       }
 
       if (data.status === 409) {
-        toast.error("User already exists")
+        toast.error("User already exists");
       }
-
     },
     onError: async () => {
-      toast.error("Failed to register user")
+      toast.error("Failed to register user");
     },
-  })
+  });
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    const formData = new FormData(event.target as HTMLFormElement)
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
     const formValues = {
-      username: formData.get("username") as string,
-      email: formData.get("email") as string,
-      password: formData.get("password") as string,
-      confirmPassword: formData.get("confirm-password") as string,
-    }
+      username: formData.get("username"),
+      email: formData.get("email"),
+      password: formData.get("password"),
+      confirmPassword: formData.get("confirm-password"),
+    };
 
     try {
-      await registerValidation.parseAsync(formValues)
-      await mutateAsync(formData)
+      await registerValidation.parseAsync(formValues);
+      await mutateAsync(formData);
     } catch (err: any) {
-      const firstError = err.errors[0]
+      const firstError = err.errors[0];
       // console.log(err)
 
-      toast.error(firstError.message)
+      toast.error(firstError.message);
     }
-  }
+  };
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4 text-foreground">
       <div className="flex w-full max-w-4xl flex-col overflow-hidden rounded-lg bg-register-image bg-contain shadow-xl md:flex-row">
@@ -228,5 +231,5 @@ export default function Register() {
         </div>
       </div>
     </div>
-  )
+  );
 }

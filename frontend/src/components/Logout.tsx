@@ -16,14 +16,18 @@ import {
 } from "components/ui/dialog"
 import { LogOut } from 'lucide-react'
 import { toast } from 'sonner'
+import { DEAUTH_URL } from 'src/utils/constants'
 
-export default function Logout() {
+type LogoutProps = {
+    as?: "default" | "menu-item"
+}
+export default function Logout({ as = "default" }: LogoutProps) {
     const { logout, token } = useAuth()
     const router = useRouter()
     const navigate = Route.useNavigate()
     const mutate = useMutation({
         mutationFn: async () => {
-            return fetch("http://localhost:3333/auth", {
+            return fetch(DEAUTH_URL, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -54,16 +58,23 @@ export default function Logout() {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="dropdown-menu"
-                    // className=''
-                    // defaultlyOpen
-                    // className='mr-4 bg-yellow-500 text-white hover:bg-yellow-700'
-                    // size="lg"
-                    size="auto"
-                >
-                    <LogOut className='mr-2 h-4 w-4' />
-                    Logout
-                </Button>
+                {as === "menu-item" ? (
+                    <Button variant="dropdown-menu"
+                        size="auto"
+                    >
+                        <LogOut className='mr-2 h-4 w-4' />
+                        Logout
+                    </Button>
+                ) :
+                    <Button
+                        // className='bg-yellow-500 text-white hover:bg-yellow-700'
+                        size="lg"
+                        variant="default"
+                    >
+                        Logout
+                    </Button>
+
+                }
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>

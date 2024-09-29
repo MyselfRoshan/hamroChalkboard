@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -38,4 +39,29 @@ type User struct {
 	UpdatedAt    NullTime  `json:"updated_at" db:"updated_at"`
 	LastLoginAt  NullTime  `json:"last_login_at" db:"last_login_at"`
 	RefreshToken string    `json:"refresh_token" db:"refresh_token"`
+}
+
+type UserClaims struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Role     Role   `json:"role"`
+	jwt.RegisteredClaims
+}
+
+func NewUserClaims(u User, expiresAt time.Duration) *UserClaims {
+	return &UserClaims{
+		Username: u.Username,
+		Email:    u.Email,
+		Role:     u.Role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expiresAt)),
+		},
+	}
+}
+func (u *User) NewUserToken(secret []byte, expiresAt time.Duration) (token string, payload *UserClaims, err error) {
+	payload = NewUserClaims(*u, expiresAt)
+	var jwtToken *jwt.Token = jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
+	tokenStr, err := jwtToken.SignedString(secret)
+	return tokenStr, payload, err
 }
