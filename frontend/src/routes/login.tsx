@@ -68,9 +68,10 @@ export default function LoginPage() {
       }
       if (data.status === 200) {
         toast.success("Signing in...")
-        const { access_token } = await data.json()
-        console.log(access_token)
-        await auth.login(access_token)
+        const { token, payload } = await data.json()
+        // console.log(token, payload)
+        // await auth.login(access_token)
+        await auth.login({ token, payload })
         await router.invalidate()
 
         await sleep(1)

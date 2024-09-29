@@ -19,6 +19,10 @@ type AppConfig struct {
 	JWT_SECRET  []byte
 	JWT_EXP     time.Duration
 	SESSION_EXP time.Duration
+	API_HOST    string
+	API_PORT    string
+	API_VERSION string
+	API_PREFIX  string
 }
 
 // LoadConfig loads configuration from environment variables or defaults.
@@ -44,6 +48,10 @@ func LoadConfig() AppConfig {
 		// For Testing
 		// JWT_EXP:     getDurationEnv("JWT_EXPIRATION", 15, time.Second),
 		// SESSION_EXP: getDurationEnv("SESSION_EXPIRATION", 30, time.Minute),
+		API_HOST:    getStrEnv("PUBLIC_API_HOST", "localhost"),
+		API_PORT:    getStrEnv("PUBLIC_API_PORT", "3333"),
+		API_VERSION: getStrEnv("PUBLIC_API_VERSION", "v1"),
+		API_PREFIX:  getStrEnv("PUBLIC_API_PREFIX", "/api"),
 	}
 }
 

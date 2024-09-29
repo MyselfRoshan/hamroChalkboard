@@ -19,4 +19,11 @@ export default mergeRsbuildConfig({
       plugins: [TanStackRouterRspack()],
     },
   },
+  output: {
+    cssModules: {
+      auto: (resource) => {
+        return resource.includes(".module.") || resource.includes("shared/");
+      },
+    },
+  },
 });

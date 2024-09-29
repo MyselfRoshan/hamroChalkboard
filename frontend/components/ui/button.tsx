@@ -9,7 +9,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        // default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default: 'bg-yellow-500 text-white hover:bg-yellow-700',
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive",
         outline:
@@ -21,6 +22,7 @@ const buttonVariants = cva(
         "dropdown-menu": "w-full text-left justify-start bg-transparent",
         bord: "hover:bg-yellow-500/20 hover:text-yellow-800",
         bordActive: "bg-yellow-500/20 text-yellow-800",
+        profile: "w-full self-end bg-yellow-500/20 p-2 text-black hover:bg-yellow-600/50 hover:text-yellow-900 focus-visible:ring-0 focus-visible:ring-offset-0"
       },
       size: {
         default: "h-10 px-4 py-2",

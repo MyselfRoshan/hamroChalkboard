@@ -2,12 +2,11 @@ package handlers
 
 import (
 	"backend/db/models"
+	"backend/helpers"
 	"errors"
 	"log"
 	"net/http"
-	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
@@ -22,7 +21,17 @@ import (
 func (r *Repository) NewClaimsFunc(c echo.Context) jwt.Claims {
 	return new(models.UserClaims)
 }
-func (r *Repository) AccessTokenHandler(c echo.Context) error {
+
+// HandlePostToken handles the access token request.
+//
+// Parameters:
+//
+//	c (echo.Context): the Echo context.
+//
+// Returns:
+//
+//	error: an error response if the token cannot be retrieved or returned.
+func (r *Repository) HandlePostToken(c echo.Context) error {
 	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(*models.UserClaims)
 	return c.JSON(http.StatusOK, echo.Map{
@@ -30,11 +39,22 @@ func (r *Repository) AccessTokenHandler(c echo.Context) error {
 	})
 }
 
+// JWTErrorHandler handles JWT errors by checking for expired or invalid claims,
+// and refreshes the access token if the refresh token is valid.
+//
+// Parameters:
+//
+//	c (echo.Context): the Echo context.
+//	err (error): the error encountered.
+//
+// Returns:
+//
+//	error: an error response if the token is expired, invalid, or cannot be refreshed.
 func (r *Repository) JWTErrorHandler(c echo.Context, err error) error {
 	if errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenInvalidClaims) {
 		username := c.QueryParam("username")
 		user, err := r.DB.GetUserByUsername(username)
-		log.Println(user, err)
+		log.Println(user, err, username)
 		if err != nil {
 			// Delete refresh token and logout user
 			log.Println("error while authenticating ", err)
@@ -43,7 +63,7 @@ func (r *Repository) JWTErrorHandler(c echo.Context, err error) error {
 				"error": "Error while authenticating.",
 			})
 		}
-		if !isValidToken(user.RefreshToken, r.Config.JWT_SECRET) {
+		if !helpers.IsValidToken(user.RefreshToken, r.Config.JWT_SECRET) {
 			// Delete refresh token and logout user
 			log.Println("refresh token expired or invalid")
 			r.DB.UpdateUserRefreshToken(username, "")
@@ -53,8 +73,6 @@ func (r *Repository) JWTErrorHandler(c echo.Context, err error) error {
 		}
 
 		// Generate new access token
-		// accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, newAccessClaims)
-		// aT, err := accessToken.SignedString(r.Config.JWT_SECRET)
 		accessToken, accessPayload, err := user.NewUserToken(r.Config.JWT_SECRET, r.Config.JWT_EXP)
 		if err != nil {
 			log.Println("could not generate access token", err)
@@ -72,16 +90,69 @@ func (r *Repository) JWTErrorHandler(c echo.Context, err error) error {
 	return nil
 }
 
-func isValidToken(tokenString string, signingKey interface{}) bool {
-	claims := &models.UserClaims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		// Ensure the token method is valid
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			log.Println("Unexpected signing method")
-			return nil, errors.New("unexpected signing method")
-		}
-		return signingKey, nil
+// HandlePostAuth handles the login request by authenticating the user credentials and generating access and refresh tokens.
+//
+// Parameters:
+//
+//	c (echo.Context): the Echo context.
+//
+// Returns:
+//
+//	error: an error response if the login process fails.
+func (r *Repository) HandlePostAuth(c echo.Context) error {
+	emailOrUsername := c.FormValue("email_or_username")
+	password := c.FormValue("password")
+
+	user, _ := r.DB.GetUserByUsernameOrEmail(emailOrUsername)
+	if user == nil {
+		return c.JSON(http.StatusUnauthorized, echo.Map{
+			"error": "Invalid email or username",
+		})
+	}
+	if !helpers.CheckPasswordHash(password, user.Password) {
+		return c.JSON(http.StatusUnauthorized, echo.Map{
+			"error": "Invalid password",
+		})
+	}
+
+	accessToken, accessPayload, err := user.NewUserToken(r.Config.JWT_SECRET, r.Config.JWT_EXP)
+	if err != nil {
+		return err
+	}
+
+	refreshToken, _, err := user.NewUserToken(r.Config.JWT_SECRET, r.Config.SESSION_EXP)
+	if err != nil {
+		return err
+	}
+
+	r.DB.UpdateUserRefreshTokenAndLastLoginTime(user.ID, refreshToken)
+	log.Println("Saved Refresh Token in DB:", refreshToken)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"token":   accessToken,
+		"payload": accessPayload,
 	})
-	log.Println("Refresh token details in invalid function", token, err)
-	return token.Valid && err == nil && token != nil
+}
+
+// HandleDeleteAuth handles the logout request by deleting the refresh token and returning a success message.
+//
+// Parameters:
+//
+//	c (echo.Context): the Echo context.
+//
+// Returns:
+//
+//	error: an error response if the logout process fails.
+func (r *Repository) HandleDeleteAuth(c echo.Context) error {
+	token := c.Get("user").(*jwt.Token)
+	user := token.Claims.(*models.UserClaims)
+
+	// Delete refresh token
+	log.Println("Deleting refresh token", token)
+	r.DB.UpdateUserRefreshToken(user.Username, "")
+
+	log.Printf("User %v logged out.\n", user.Username)
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "Successfully logged out.",
+	})
 }
