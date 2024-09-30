@@ -48,10 +48,10 @@ func LoadConfig() AppConfig {
 		// For Testing
 		// JWT_EXP:     getDurationEnv("JWT_EXPIRATION", 15, time.Second),
 		// SESSION_EXP: getDurationEnv("SESSION_EXPIRATION", 30, time.Minute),
-		API_HOST:    getStrEnv("PUBLIC_API_HOST", "localhost"),
-		API_PORT:    getStrEnv("PUBLIC_API_PORT", "3333"),
-		API_VERSION: getStrEnv("PUBLIC_API_VERSION", "v1"),
-		API_PREFIX:  getStrEnv("PUBLIC_API_PREFIX", "/api"),
+		API_HOST:    getStrEnv("API_HOST", "localhost"),
+		API_PORT:    getStrEnv("API_PORT", "3333"),
+		API_VERSION: getStrEnv("API_VERSION", "v1"),
+		API_PREFIX:  getStrEnv("API_PREFIX", "/api"),
 	}
 }
 

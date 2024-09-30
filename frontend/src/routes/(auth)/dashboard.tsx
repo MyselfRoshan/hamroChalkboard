@@ -23,7 +23,7 @@ import { LayoutGrid, List } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "src/auth";
 import RoomCreate from "src/components/Room/RoomCreate";
-import { RoomDisplay } from "src/components/Room/RoomDisplay";
+import { Room, RoomDisplay } from "src/components/Room/RoomDisplay";
 import Sidebar from "src/components/Sidebar";
 import { ROOM_URL } from "src/utils/constants";
 
@@ -88,9 +88,6 @@ export default function DashboardPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
 
-  const createdRooms = rooms.filter(
-    (room) => room.createdBy === currentUser.id,
-  );
   const participatingRooms = rooms.filter(
     (room) =>
       room.createdBy !== currentUser.id &&
@@ -98,15 +95,16 @@ export default function DashboardPage() {
   );
 
   const { authFetch } = useAuth();
+  // const queryClient = useQueryClient();
   const query = useQuery({
     queryKey: ["rooms"],
     queryFn: async () => {
       const data = await authFetch(ROOM_URL, { method: "GET" });
-      console.log(await data.json());
-      return data;
+      return await data.json();
     },
   });
-
+  const rms = query.data;
+  console.log("rooms", rms);
   return (
     <div
       className={cn(
@@ -153,18 +151,29 @@ export default function DashboardPage() {
                 <div
                   className={
                     viewMode === "grid"
-                      ? "grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
-                      : "space-y-4"
+                      ? "grid grid-cols-1 gap-4 md:grid-cols-2"
+                      : // ? "grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
+                        "grid gap-4"
                   }
                 >
-                  {createdRooms.map((room) => (
+                  {(rms !== undefined || rms) &&
+                    rms?.rooms.map((room: Room) => (
+                      <RoomDisplay
+                        key={room.id}
+                        room={room}
+                        isCreator={true}
+                        setRooms={setRooms}
+                      />
+                    ))}
+
+                  {/* {rms?.map((room: Room) => (
                     <RoomDisplay
                       key={room.id}
                       room={room}
                       isCreator={true}
                       setRooms={setRooms}
                     />
-                  ))}
+                  ))} */}
                 </div>
               </ScrollArea>
             </TabsContent>
@@ -177,13 +186,13 @@ export default function DashboardPage() {
                       : "space-y-4"
                   }
                 >
-                  {participatingRooms.map((room) => (
+                  {/* {participatingRooms.map((room) => (
                     <RoomDisplay
                       key={room.id}
                       room={room}
                       setRooms={setRooms}
                     />
-                  ))}
+                  ))} */}
                 </div>
               </ScrollArea>
             </TabsContent>

@@ -1,38 +1,38 @@
-import { Button } from "components/ui/button"
-import { Input } from "components/ui/input"
-import { Label } from "components/ui/label"
-import { CircleX, Download } from "lucide-react"
-import React, { useEffect, useRef } from "react"
-import { toast } from "sonner"
-import { useHistoryContext } from "src/hooks/useHistory"
+import { Button } from "components/ui/button";
+import { Input } from "components/ui/input";
+import { Label } from "components/ui/label";
+import { CircleX, Download } from "lucide-react";
+import React, { useEffect, useRef } from "react";
+import { toast } from "sonner";
+import { useHistoryContext } from "src/hooks/useHistory";
 
 type FileDownloaderProps = {
-  isOpen: boolean
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
-}
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+};
 
 export const FileDownloader = ({ isOpen, setIsOpen }: FileDownloaderProps) => {
-  const { getHistory } = useHistoryContext()
-  const [fileName, setFileName] = React.useState("untitled")
-  const extension = ".chalkboard"
-  const modalRef = useRef<HTMLDivElement>(null)
+  const { getHistory } = useHistoryContext();
+  const [fileName, setFileName] = React.useState("untitled");
+  const extension = ".chalkboard";
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const handleDownload = () => {
     if (getHistory().length === 0) {
-      toast.error("Chalkboard is empty")
-      return
+      toast.error("Chalkboard is empty");
+      return;
     }
-    const fileContent = JSON.stringify(getHistory())
-    const file = new Blob([fileContent], { type: "application/json" })
-    const link = document.createElement("a")
-    link.href = URL.createObjectURL(file)
-    link.download = `${fileName}${extension}`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(link.href)
-    toast.success("Chalkboard Downloaded Successfully")
-  }
+    const fileContent = JSON.stringify(getHistory());
+    const file = new Blob([fileContent], { type: "application/json" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(file);
+    link.download = `${fileName}${extension}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+    toast.success("Chalkboard Downloaded Successfully");
+  };
 
   // Handle click outside modal to close it
   useEffect(() => {
@@ -41,18 +41,18 @@ export const FileDownloader = ({ isOpen, setIsOpen }: FileDownloaderProps) => {
         modalRef.current &&
         !modalRef.current.contains(event.target as Node)
       ) {
-        setIsOpen(false)
+        setIsOpen(false);
       }
-    }
+    };
 
     if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside)
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isOpen, setIsOpen])
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, setIsOpen]);
 
   return (
     <>
@@ -98,5 +98,5 @@ export const FileDownloader = ({ isOpen, setIsOpen }: FileDownloaderProps) => {
         </div>
       ) : null}
     </>
-  )
-}
+  );
+};

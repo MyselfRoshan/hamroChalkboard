@@ -413,8 +413,6 @@
 //   )
 // }
 
-
-
 /*
 Using vo v1
 
@@ -837,14 +835,13 @@ Using vo v1
 //   )
 // }
 
-
 /*
 Using v0 v2 zoom
 
 */
 
-import { cn } from "lib/utils"
-import { Menu } from "lucide-react"
+import { cn } from "lib/utils";
+import { Menu } from "lucide-react";
 import React, {
   PointerEvent,
   useEffect,
@@ -852,46 +849,46 @@ import React, {
   useRef,
   useState,
   WheelEvent,
-} from "react"
-import { toast } from "sonner"
-import { useHistoryContext } from "src/hooks/useHistory"
-import { WindowSize } from "src/hooks/useWindowSize"
-import { CanvasMode, CanvasSetting, Point } from "types/canvas"
-import BurgerMenu from "./BurgerMenu"
-import { CustomizationBar } from "./CustomizationBar"
-import FlexibleButton from "./FlexibleButton"
-import Toolbar from "./Toolbar"
-let lastPath: Point[] = []
+} from "react";
+import { toast } from "sonner";
+import { useHistoryContext } from "src/hooks/useHistory";
+import { WindowSize } from "src/hooks/useWindowSize";
+import { CanvasMode, CanvasSetting, Point } from "types/canvas";
+import BurgerMenu from "./BurgerMenu";
+import { CustomizationBar } from "./CustomizationBar";
+import FlexibleButton from "./FlexibleButton";
+import Toolbar from "./Toolbar";
+let lastPath: Point[] = [];
 
-import "./App.css"
-import { CustomCursor } from "./CustomCursor"
+import "./App.css";
+import { CustomCursor } from "./CustomCursor";
 
 type CanvasProps = {
-  boardId: string
-  settings: React.MutableRefObject<CanvasSetting>
-  size: WindowSize
-}
+  boardId: string;
+  settings: React.MutableRefObject<CanvasSetting>;
+  size: WindowSize;
+};
 
 export default function Canvas({ settings, size }: CanvasProps) {
-  const PAN_LIMIT = 7000
-  const width = Math.min(size.width, PAN_LIMIT)
-  const height = Math.min(size.height, PAN_LIMIT)
-  const [drawing, setDrawing] = useState<boolean>(false)
-  const isDrawing = useRef<boolean>(false)
-  const [, render] = useReducer((prev) => !prev, false)
-  const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
+  const PAN_LIMIT = 7000;
+  const width = Math.min(size.width, PAN_LIMIT);
+  const height = Math.min(size.height, PAN_LIMIT);
+  const [drawing, setDrawing] = useState<boolean>(false);
+  const isDrawing = useRef<boolean>(false);
+  const [, render] = useReducer((prev) => !prev, false);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
 
-  const coords = useRef<Point>([0, 0])
+  const coords = useRef<Point>([0, 0]);
 
-  const isMoving = useRef<boolean>(false)
-  const importInput = useRef<HTMLInputElement | null>(null)
+  const isMoving = useRef<boolean>(false);
+  const importInput = useRef<HTMLInputElement | null>(null);
 
   // Zoom state
-  const [zoom, setZoom] = useState<number>(1)
-  const MIN_ZOOM = 0.5
-  const MAX_ZOOM = 5
-  const ZOOM_FACTOR = 0.01
+  const [zoom, setZoom] = useState<number>(1);
+  const MIN_ZOOM = 0.5;
+  const MAX_ZOOM = 5;
+  const ZOOM_FACTOR = 0.01;
 
   const {
     importHistory,
@@ -900,66 +897,66 @@ export default function Canvas({ settings, size }: CanvasProps) {
     redoHistory,
     getHistory,
     getRedoHistory,
-  } = useHistoryContext()
+  } = useHistoryContext();
 
   const prevent = (
     e: PointerEvent | Event | React.MouseEvent<HTMLButtonElement>,
   ) => {
-    e.preventDefault()
-    e.stopPropagation()
-  }
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
   const onPointerDown = (e: PointerEvent) => {
-    prevent(e)
-    getContext(settings.current)
-    coords.current = [e.clientX, e.clientY]
+    prevent(e);
+    getContext(settings.current);
+    coords.current = [e.clientX, e.clientY];
     if (settings.current.mode === CanvasMode.Pan) {
-      isMoving.current = true
-      return
+      isMoving.current = true;
+      return;
     }
-    isDrawing.current = true
-    setDrawing(true)
-    const point = getPoint(e, ctxRef.current!)
-    lastPath = []
-    drawModes(settings.current.mode, ctxRef.current!, point, lastPath)
-  }
+    isDrawing.current = true;
+    setDrawing(true);
+    const point = getPoint(e, ctxRef.current!);
+    lastPath = [];
+    drawModes(settings.current.mode, ctxRef.current!, point, lastPath);
+  };
 
   const onPointerUp: EventListenerOrEventListenerObject = (e): void => {
-    prevent(e)
+    prevent(e);
     if (settings.current.mode === CanvasMode.Pan) {
-      isMoving.current = false
-      return
+      isMoving.current = false;
+      return;
     }
-    isDrawing.current = false
-    setDrawing(false)
+    isDrawing.current = false;
+    setDrawing(false);
     if (lastPath.length > 0) {
-      pushHistory({ ...settings.current, path: lastPath })
-      lastPath = []
-      drawCanvas(getContext())
+      pushHistory({ ...settings.current, path: lastPath });
+      lastPath = [];
+      drawCanvas(getContext());
     }
-  }
+  };
 
   const onCanvasMove = (e: PointerEvent, ctx: CanvasRenderingContext2D) => {
-    const [x1, y1] = coords.current
-    const { clientX: x2, clientY: y2 } = e
-    let dx = x2 - x1
-    let dy = y2 - y1
-    if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return
-    const { a, d, e: tdx, f: tdy } = ctx.getTransform()
-    const ntdx = Math.min(Math.max(-(PAN_LIMIT - width), tdx + dx / a), 0)
-    const ntdy = Math.min(Math.max(-(PAN_LIMIT - height), tdy + dy / d), 0)
-    ctx.setTransform(a, 0, 0, d, ntdx, ntdy)
-    drawCanvas(ctx)
-    coords.current = [x2, y2]
-  }
+    const [x1, y1] = coords.current;
+    const { clientX: x2, clientY: y2 } = e;
+    let dx = x2 - x1;
+    let dy = y2 - y1;
+    if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+    const { a, d, e: tdx, f: tdy } = ctx.getTransform();
+    const ntdx = Math.min(Math.max(-(PAN_LIMIT - width), tdx + dx / a), 0);
+    const ntdy = Math.min(Math.max(-(PAN_LIMIT - height), tdy + dy / d), 0);
+    ctx.setTransform(a, 0, 0, d, ntdx, ntdy);
+    drawCanvas(ctx);
+    coords.current = [x2, y2];
+  };
 
   const onPointerMove: EventListenerOrEventListenerObject = (e) => {
-    prevent(e)
-    if (isMoving.current) return onCanvasMove(e as any, ctxRef.current!)
-    if (!isDrawing.current) return
-    const point = getPoint(e as any, ctxRef.current!)
-    drawModes(settings.current.mode, ctxRef.current!, point, lastPath)
-  }
+    prevent(e);
+    if (isMoving.current) return onCanvasMove(e as any, ctxRef.current!);
+    if (!isDrawing.current) return;
+    const point = getPoint(e as any, ctxRef.current!);
+    drawModes(settings.current.mode, ctxRef.current!, point, lastPath);
+  };
 
   const drawModes = (
     mode: CanvasMode,
@@ -969,179 +966,179 @@ export default function Canvas({ settings, size }: CanvasProps) {
   ) => {
     switch (mode) {
       case CanvasMode.Pencil:
-        point ? previewPen(point, ctx) : drawPen(path, ctx)
-        break
+        point ? previewPen(point, ctx) : drawPen(path, ctx);
+        break;
 
       case CanvasMode.Line:
         if (point) {
-          path.length === 0 ? (path[0] = point) : (path[1] = point)
-          previewLine(path, ctx)
+          path.length === 0 ? (path[0] = point) : (path[1] = point);
+          previewLine(path, ctx);
         } else {
-          if (path.length === 1) path[1] = path[0]
-          drawLine(path, ctx)
+          if (path.length === 1) path[1] = path[0];
+          drawLine(path, ctx);
         }
-        break
+        break;
 
       case CanvasMode.Rect:
         if (point) {
-          path.length === 0 ? (path[0] = point) : (path[1] = point)
-          previewRect(path, ctx)
+          path.length === 0 ? (path[0] = point) : (path[1] = point);
+          previewRect(path, ctx);
         } else {
-          if (path.length === 1) path[1] = path[0]
-          drawRect(path, ctx)
+          if (path.length === 1) path[1] = path[0];
+          drawRect(path, ctx);
         }
-        break
+        break;
       case CanvasMode.Ellipse:
         if (point) {
-          path.length === 0 ? (path[0] = point) : (path[1] = point)
-          previewCircle(path, ctx)
+          path.length === 0 ? (path[0] = point) : (path[1] = point);
+          previewCircle(path, ctx);
         } else {
-          if (path.length === 1) path[1] = path[0]
-          drawCircle(path, ctx)
+          if (path.length === 1) path[1] = path[0];
+          drawCircle(path, ctx);
         }
-        break
+        break;
       default:
-        return
+        return;
     }
-  }
+  };
 
   const getContext = (
     config?: CanvasSetting,
     ctx?: CanvasRenderingContext2D,
   ) => {
-    const canvas = canvasRef.current
+    const canvas = canvasRef.current;
     if (canvas) {
-      ctxRef.current = canvas.getContext("2d")
+      ctxRef.current = canvas.getContext("2d");
     }
 
-    if (!ctx) ctx = ctxRef.current!
+    if (!ctx) ctx = ctxRef.current!;
     if (config) {
-      ctx.strokeStyle = config.color.toString()
-      ctx.lineWidth = config.stroke
-      ctx.lineCap = "round"
-      ctx.lineJoin = "round"
+      ctx.strokeStyle = config.color.toString();
+      ctx.lineWidth = config.stroke;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
     }
-    return ctx
-  }
+    return ctx;
+  };
 
   const getPoint = (e: PointerEvent, ctx: CanvasRenderingContext2D): Point => {
-    const { a, d, e: dx, f: dy } = ctx.getTransform()
-    const rect = canvasRef.current!.getBoundingClientRect()
-    return [(e.clientX - rect.x - dx) / a, (e.clientY - rect.y - dy) / d]
-  }
+    const { a, d, e: dx, f: dy } = ctx.getTransform();
+    const rect = canvasRef.current!.getBoundingClientRect();
+    return [(e.clientX - rect.x - dx) / a, (e.clientY - rect.y - dy) / d];
+  };
 
   const previewLine = (path: Point[], ctx: CanvasRenderingContext2D) => {
-    if (path.length < 2) return
-    drawCanvas(ctx)
-    drawLine(path, getContext(settings.current, ctx))
-  }
+    if (path.length < 2) return;
+    drawCanvas(ctx);
+    drawLine(path, getContext(settings.current, ctx));
+  };
 
   const drawLine = (path: Point[], ctx: CanvasRenderingContext2D) => {
-    ctx.beginPath()
-    ctx.moveTo(path[0][0], path[0][1])
-    ctx.lineTo(path[1][0], path[1][1])
-    ctx.stroke()
-  }
+    ctx.beginPath();
+    ctx.moveTo(path[0][0], path[0][1]);
+    ctx.lineTo(path[1][0], path[1][1]);
+    ctx.stroke();
+  };
 
   const previewRect = (path: Point[], ctx: CanvasRenderingContext2D) => {
-    if (path.length < 2) return
-    drawCanvas(ctx)
-    drawRect(path, getContext(settings.current, ctx))
-  }
+    if (path.length < 2) return;
+    drawCanvas(ctx);
+    drawRect(path, getContext(settings.current, ctx));
+  };
 
   const drawRect = (path: Point[], ctx: CanvasRenderingContext2D) => {
-    ctx.beginPath()
+    ctx.beginPath();
     ctx.rect(
       path[0][0],
       path[0][1],
       path[1][0] - path[0][0],
       path[1][1] - path[0][1],
-    )
-    ctx.stroke()
-  }
+    );
+    ctx.stroke();
+  };
 
   const previewCircle = (path: Point[], ctx: CanvasRenderingContext2D) => {
-    if (path.length < 2) return
-    drawCanvas(ctx)
-    getContext(settings.current, ctx) // reset context
-    drawCircle(path, ctx)
-  }
+    if (path.length < 2) return;
+    drawCanvas(ctx);
+    getContext(settings.current, ctx); // reset context
+    drawCircle(path, ctx);
+  };
 
   const getDistance = ([[p1X, p1Y], [p2X, p2Y]]: Point[]) => {
-    return Math.sqrt(Math.pow(p1X - p2X, 2) + Math.pow(p1Y - p2Y, 2))
-  }
+    return Math.sqrt(Math.pow(p1X - p2X, 2) + Math.pow(p1Y - p2Y, 2));
+  };
 
   const drawCircle = (path: Point[], ctx: CanvasRenderingContext2D) => {
-    ctx.beginPath()
-    ctx.arc(path[0][0], path[0][1], getDistance(path), 0, 2 * Math.PI)
-    ctx.stroke()
-  }
+    ctx.beginPath();
+    ctx.arc(path[0][0], path[0][1], getDistance(path), 0, 2 * Math.PI);
+    ctx.stroke();
+  };
 
   const previewPen = (point: Point, ctx: CanvasRenderingContext2D) => {
     if (lastPath.length === 0) {
-      ctx.beginPath()
-      ctx.moveTo(point[0], point[1])
+      ctx.beginPath();
+      ctx.moveTo(point[0], point[1]);
     }
-    ctx.lineTo(point[0], point[1])
-    ctx.stroke()
-    lastPath.push(point)
-  }
+    ctx.lineTo(point[0], point[1]);
+    ctx.stroke();
+    lastPath.push(point);
+  };
 
   const drawPen = (points: Point[], ctx: CanvasRenderingContext2D) => {
-    ctx.beginPath()
+    ctx.beginPath();
     for (const p of points) {
-      ctx.lineTo(p[0], p[1])
+      ctx.lineTo(p[0], p[1]);
     }
-    ctx.stroke()
-  }
+    ctx.stroke();
+  };
 
   const clearCanvas = (ctx: CanvasRenderingContext2D) => {
-    ctx.save()
-    ctx.setTransform(1, 0, 0, 1, 0, 0)
-    ctx.clearRect(0, 0, PAN_LIMIT, PAN_LIMIT)
-    ctx.restore()
-  }
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, PAN_LIMIT, PAN_LIMIT);
+    ctx.restore();
+  };
 
   const drawCanvas = (ctx: CanvasRenderingContext2D) => {
-    clearCanvas(ctx)
+    clearCanvas(ctx);
     for (const item of getHistory()) {
-      getContext(item, ctx)
-      drawModes(item.mode, ctx, null, item.path)
+      getContext(item, ctx);
+      drawModes(item.mode, ctx, null, item.path);
     }
-  }
+  };
 
   const undoCanvas = (
     e: React.MouseEvent<HTMLButtonElement> | KeyboardEvent,
   ) => {
     if (e instanceof MouseEvent) {
-      prevent(e)
+      prevent(e);
     }
-    if (getHistory().length === 0) return
-    popHistory()
-    drawCanvas(getContext())
-    render()
-  }
+    if (getHistory().length === 0) return;
+    popHistory();
+    drawCanvas(getContext());
+    render();
+  };
 
   const redoCanvas = (
     e: React.MouseEvent<HTMLButtonElement> | KeyboardEvent,
   ) => {
     if (e instanceof MouseEvent) {
-      prevent(e)
+      prevent(e);
     }
-    redoHistory()
-    drawCanvas(getContext())
-    render()
-  }
+    redoHistory();
+    drawCanvas(getContext());
+    render();
+  };
 
   const setMode = (mode: CanvasMode) => {
-    settings.current.mode = mode
-    render()
-  }
+    settings.current.mode = mode;
+    render();
+  };
 
   useEffect(() => {
-    document.addEventListener("pointerup", onPointerUp)
-    document.addEventListener("pointermove", onPointerMove)
-    const ctx = getContext()
+    document.addEventListener("pointerup", onPointerUp);
+    document.addEventListener("pointermove", onPointerMove);
+    const ctx = getContext();
     ctx.setTransform(
       zoom,
       0,
@@ -1149,42 +1146,42 @@ export default function Canvas({ settings, size }: CanvasProps) {
       zoom,
       -(PAN_LIMIT - width) / 2,
       -(PAN_LIMIT - height) / 2,
-    )
-    drawCanvas(ctx)
+    );
+    drawCanvas(ctx);
     return () => {
-      document.removeEventListener("pointerup", onPointerUp)
-      document.removeEventListener("pointermove", onPointerMove)
-    }
-  }, [width, height, zoom])
+      document.removeEventListener("pointerup", onPointerUp);
+      document.removeEventListener("pointermove", onPointerMove);
+    };
+  }, [width, height, zoom]);
 
   const changeColor = (color: string) => {
-    settings.current.color = color
-  }
+    settings.current.color = color;
+  };
 
   const importCanvas = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.length === 0) return
-    const file = e.target.files![0]
+    if (e.target.files?.length === 0) return;
+    const file = e.target.files![0];
     if (!file.name.endsWith(".chalkboard")) {
-      toast.error("Please select a .chalkboard file.")
-      return
+      toast.error("Please select a .chalkboard file.");
+      return;
     }
-    const reader = new FileReader()
+    const reader = new FileReader();
     reader.onload = () => {
       try {
-        importHistory(JSON.parse(reader.result as string))
-        drawCanvas(getContext())
-        render()
-        toast.success(`${file.name} Imported Successfully`)
+        importHistory(JSON.parse(reader.result as string));
+        drawCanvas(getContext());
+        render();
+        toast.success(`${file.name} Imported Successfully`);
       } catch (err) {
-        toast.error("Invalid Chalkboard File")
+        toast.error("Invalid Chalkboard File");
       }
-    }
-    reader.readAsText(file)
-  }
+    };
+    reader.readAsText(file);
+  };
 
   const onImportClick = () => {
-    importInput.current?.click()
-  }
+    importInput.current?.click();
+  };
 
   // const handleWheel = (e: WheelEvent<HTMLCanvasElement>) => {
   //   e.preventDefault()
@@ -1208,32 +1205,39 @@ export default function Canvas({ settings, size }: CanvasProps) {
   //   drawCanvas(ctx)
   // }
   const handleWheel = (e: WheelEvent<HTMLCanvasElement>) => {
-    e.preventDefault()
-    const ctx = ctxRef.current!
-    if (!ctx) return
+    e.preventDefault();
+    const ctx = ctxRef.current!;
+    if (!ctx) return;
 
-    const { deltaY } = e
-    const rect = canvasRef.current!.getBoundingClientRect()
-    const offsetX = e.clientX - rect.left
-    const offsetY = e.clientY - rect.top
+    const { deltaY } = e;
+    const rect = canvasRef.current!.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
 
-    const { a: currentZoom, e: currentOffsetX, f: currentOffsetY } = ctx.getTransform()
+    const {
+      a: currentZoom,
+      e: currentOffsetX,
+      f: currentOffsetY,
+    } = ctx.getTransform();
 
-    const zoomFactor = 1 - deltaY * ZOOM_FACTOR * 0.01
-    const newZoom = Math.min(Math.max(currentZoom * zoomFactor, MIN_ZOOM), MAX_ZOOM)
+    const zoomFactor = 1 - deltaY * ZOOM_FACTOR * 0.01;
+    const newZoom = Math.min(
+      Math.max(currentZoom * zoomFactor, MIN_ZOOM),
+      MAX_ZOOM,
+    );
 
     const zoomPoint = {
       x: (offsetX - currentOffsetX) / currentZoom,
       y: (offsetY - currentOffsetY) / currentZoom,
-    }
+    };
 
-    const newOffsetX = offsetX - zoomPoint.x * newZoom
-    const newOffsetY = offsetY - zoomPoint.y * newZoom
+    const newOffsetX = offsetX - zoomPoint.x * newZoom;
+    const newOffsetY = offsetY - zoomPoint.y * newZoom;
 
-    ctx.setTransform(newZoom, 0, 0, newZoom, newOffsetX, newOffsetY)
-    setZoom(newZoom)
-    drawCanvas(ctx)
-  }
+    ctx.setTransform(newZoom, 0, 0, newZoom, newOffsetX, newOffsetY);
+    setZoom(newZoom);
+    drawCanvas(ctx);
+  };
   return (
     <>
       <canvas
@@ -1264,9 +1268,7 @@ export default function Canvas({ settings, size }: CanvasProps) {
 
       {settings.current.mode !== CanvasMode.Pan &&
         settings.current.mode !== CanvasMode.None && (
-          <CustomizationBar
-            settings={settings}
-          />
+          <CustomizationBar settings={settings} />
         )}
       <BurgerMenu openFile={onImportClick}>
         <div>
@@ -1286,5 +1288,5 @@ export default function Canvas({ settings, size }: CanvasProps) {
           <CustomCursor size={settings.current.stroke} />
         )}
     </>
-  )
+  );
 }
