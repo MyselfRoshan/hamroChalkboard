@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "components/ui/button";
 import {
   Card,
@@ -17,8 +17,9 @@ import { RoomValidation as roomValidation } from "src/utils/validation/roomValid
 type RoomCreateProps = {};
 export default function RoomCreate() {
   //   const [newRoomName, setNewRoomName] = useState("");
+  const queryClient = useQueryClient();
   const { token, authFetch } = useAuth();
-  const { mutateAsync } = useMutation({
+  const { mutateAsync, isPending } = useMutation({
     mutationFn: async (formData: FormData) => {
       return await authFetch(ROOM_URL, {
         method: "POST",
@@ -26,9 +27,11 @@ export default function RoomCreate() {
       });
     },
     onSuccess: async (data) => {
-      console.log(data);
-      console.log(await data.json());
+      queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      const { message } = await data.json();
+      toast.success(message);
     },
+
     onError: async (err) => {
       console.log(err);
       toast.error("Failed to create room");
@@ -47,8 +50,8 @@ export default function RoomCreate() {
       await mutateAsync(formData);
     } catch (err: any) {
       console.log(err);
-      //   const firstError = err.errors[0];
-      //   toast.error(firstError.message);
+      const firstError = err.errors[0];
+      toast.error(firstError.message);
     }
   };
   return (
@@ -70,7 +73,9 @@ export default function RoomCreate() {
             placeholder="Enter room name"
             className="bg-background/50"
           />
-          <Button type="submit">Create Room</Button>
+          <Button type="submit">
+            {isPending ? "Creating..." : "Create Room"}
+          </Button>
         </form>
       </CardContent>
     </Card>

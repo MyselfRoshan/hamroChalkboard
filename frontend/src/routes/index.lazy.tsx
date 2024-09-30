@@ -1,23 +1,21 @@
-import { createLazyFileRoute, Link } from "@tanstack/react-router"
-import { Button } from "components/ui/button"
-import { LucideIcon, Pencil, Share2, Users } from "lucide-react"
-import { useEffect, useState } from "react"
-import Header from "src/components/Header"
+import { createLazyFileRoute, Link } from "@tanstack/react-router";
+import { Button } from "components/ui/button";
+import { LucideIcon, Pencil, Share2, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import Header from "src/components/Header";
 
 export const Route = createLazyFileRoute("/")({
   component: () => <LandingPage />,
-})
+});
 
 function LandingPage() {
-
-
-  const [scrollY, setScrollY] = useState(0)
+  const [scrollY, setScrollY] = useState(0);
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY)
-    window.addEventListener("scroll", handleScroll)
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", handleScroll);
 
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <div className="min-h-screen overflow-hidden bg-gradient-to-b from-yellow-50 to-white text-gray-800">
@@ -173,14 +171,13 @@ function LandingPage() {
         </div>
       </footer>
     </div>
-  )
-
+  );
 }
 type FeatureCardProps = {
-  icon: LucideIcon
-  title: string
-  description: string
-}
+  icon: LucideIcon;
+  title: string;
+  description: string;
+};
 
 function FeatureCard({ icon: Icon, title, description }: FeatureCardProps) {
   return (
@@ -191,5 +188,5 @@ function FeatureCard({ icon: Icon, title, description }: FeatureCardProps) {
       <h4 className="mb-2 text-xl font-semibold text-yellow-800">{title}</h4>
       <p className="text-gray-600">{description}</p>
     </div>
-  )
+  );
 }

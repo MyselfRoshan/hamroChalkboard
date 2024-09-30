@@ -1,3 +1,4 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "components/ui/avatar";
 import { Button } from "components/ui/button";
@@ -13,6 +14,10 @@ import { Input } from "components/ui/input";
 import { cn } from "lib/utils";
 import { ArrowRight, Clock, Pencil, Send, Trash, Users } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import { useAuth } from "src/auth";
+import { ROOM_URL } from "src/utils/constants";
+import { timeAgo } from "src/utils/utils";
 import styles from "./index.module.css";
 export type Room = {
   id: number;
@@ -22,8 +27,12 @@ export type Room = {
     name: string;
     avatar: string;
   }[];
-  createdAt: string;
-  createdBy: number;
+  created_at: string;
+  creator: {
+    id: number;
+    name: string;
+    avatar: string;
+  };
 };
 export type RoomCardProps = {
   room: Room;
@@ -40,8 +49,31 @@ export function RoomDisplay({
   isCreator = false,
   setRooms,
 }: RoomCardProps) {
-  console.log(styles.avatarList);
   const [inviteEmail, setInviteEmail] = useState("");
+
+  const { authFetch } = useAuth();
+  const queryClient = useQueryClient();
+  const { mutateAsync } = useMutation({
+    mutationFn: async (roomId: number) => {
+      const response = await authFetch(`${ROOM_URL}/${roomId}`, {
+        method: "DELETE",
+      });
+      console.log(response);
+      return await response.json();
+    },
+    onSuccess: async (data) => {
+      queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      const { message } = await data.json();
+      toast.success(message);
+    },
+
+    onError: async (err) => {
+      console.log(err);
+      toast.error("Failed to delete room");
+      return;
+    },
+  });
+
   const handleUpdateRoom = (roomId: number, newName: string) => {
     setRooms((prevRooms: Room[]) =>
       prevRooms.map((room) =>
@@ -49,11 +81,18 @@ export function RoomDisplay({
       ),
     );
   };
-  console.log(room.name.length);
-  const handleDeleteRoom = (roomId: number) => {
-    setRooms((prevRooms: Room[]) =>
-      prevRooms.filter((room) => room.id !== roomId),
-    );
+  // console.log(room);
+  const handleDelete = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    roomId: number,
+  ) => {
+    e.preventDefault();
+    try {
+      await mutateAsync(room.id);
+    } catch (error) {}
+    // setRooms((prevRooms: Room[]) =>
+    //   prevRooms.filter((room) => room.id !== roomId),
+    // );
   };
 
   const handleSendInvite = (roomId: number) => {
@@ -83,7 +122,7 @@ export function RoomDisplay({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => handleDeleteRoom(room.id)}
+                onClick={(e) => handleDelete(e, room.id)}
               >
                 <Trash className="h-4 w-4" />
               </Button>
@@ -94,33 +133,34 @@ export function RoomDisplay({
           <div className="flex items-center">
             <Users className="mr-1 h-4 w-4" />
             <span className="mr-4">
-              {room.participants.length} participants
+              {room.participants ? room.participants.length : 0} participants
             </span>
             <Clock className="mr-1 h-4 w-4" />
-            <span>{new Date(room.createdAt).toLocaleDateString()}</span>
+            <span>{timeAgo(room.created_at)}</span>
           </div>
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className={cn(styles.avatarList)}>
-          {room.participants.slice(0, 5).map((participant) => (
-            <Avatar key={participant.id} className={cn(styles.avatar)}>
-              <Link to="/" className={styles.avatarLink}>
-                <AvatarImage
-                  src={participant.avatar}
-                  alt={participant.name}
-                  className={styles.avatarImg}
-                />
-                <AvatarFallback
-                  style={{ backgroundColor: getRandomPastelColor() }}
-                  className="text-lg font-bold"
-                >
-                  {participant.name.charAt(0)}
-                </AvatarFallback>
-              </Link>
-            </Avatar>
-          ))}
-          {room.participants.length > 5 && (
+          {room.participants &&
+            room.participants.slice(0, 5).map((participant) => (
+              <Avatar key={participant.id} className={cn(styles.avatar)}>
+                <Link to="/" className={styles.avatarLink}>
+                  <AvatarImage
+                    src={participant.avatar}
+                    alt={participant.name}
+                    className={styles.avatarImg}
+                  />
+                  <AvatarFallback
+                    style={{ backgroundColor: getRandomPastelColor() }}
+                    className="text-lg font-bold"
+                  >
+                    {participant.name.charAt(0)}
+                  </AvatarFallback>
+                </Link>
+              </Avatar>
+            ))}
+          {room.participants && room.participants.length > 5 && (
             <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-primary text-xs font-medium text-primary-foreground">
               +{room.participants.length - 5}
             </div>

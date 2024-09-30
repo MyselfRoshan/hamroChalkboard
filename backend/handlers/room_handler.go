@@ -45,14 +45,38 @@ func (r *Repository) HandlePostRoom(c echo.Context) error {
 }
 
 func (r *Repository) HandleGetRooms(c echo.Context) error {
-	rooms, err := r.DB.GetAllRooms()
+	token := c.Get("user").(*jwt.Token)
+	user := token.Claims.(*models.UserClaims)
+	creator, err := r.DB.GetUserByUsername(user.Username)
 	if err != nil {
 		log.Println("Failed to get rooms:", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, echo.Map{
-			"error": "Failed to get rooms",
+			"error": "Failed to fetch rooms",
+		})
+	}
+	rooms, err := r.DB.GetRoomsByCreatorID(creator.ID)
+	if err != nil {
+		log.Println("Failed to get rooms:", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, echo.Map{
+			"error": "Failed to fetch rooms",
+		})
+	}
+
+	fmt.Println(rooms)
+	return c.JSON(http.StatusOK, echo.Map{
+		"rooms": rooms,
+	})
+}
+
+func (r *Repository) HandleDeleteRoom(c echo.Context) error {
+	id := c.Param("id")
+	if err := r.DB.DeleteRoom(id); err != nil {
+		log.Println("Failed to delete room:", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, echo.Map{
+			"error": "Failed to delete room",
 		})
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"rooms": rooms,
+		"message": "Room with id " + id + " deleted successfully",
 	})
 }
