@@ -63,8 +63,11 @@ export function RoomDisplay({
     },
     onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ["rooms"] });
-      const { message } = await data.json();
-      toast.success(message);
+      // const { message } = await data.json();
+      console.log(data);
+      console.log(data);
+
+      toast.success(data.message);
     },
 
     onError: async (err) => {
@@ -120,7 +123,7 @@ export function RoomDisplay({
                 <Pencil className="h-4 w-4" />
               </Button>
               <Button
-                variant="ghost"
+                variant="destructiveHover"
                 size="sm"
                 onClick={(e) => handleDelete(e, room.id)}
               >

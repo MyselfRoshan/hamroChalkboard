@@ -156,7 +156,8 @@ export default function DashboardPage() {
                         "grid gap-4"
                   }
                 >
-                  {(rms !== undefined || rms) &&
+                  {rms !== undefined &&
+                    rms?.rooms &&
                     rms?.rooms.map((room: Room) => (
                       <RoomDisplay
                         key={room.id}
