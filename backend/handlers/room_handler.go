@@ -40,7 +40,7 @@ func (r *Repository) HandlePostRoom(c echo.Context) error {
 	}
 	fmt.Println("name", name)
 	return c.JSON(http.StatusOK, echo.Map{
-		"message": "Room with name " + name + " created successfully",
+		"message": fmt.Sprintf("Room with name '%s' created successfully", name),
 	})
 }
 
@@ -70,7 +70,8 @@ func (r *Repository) HandleGetRooms(c echo.Context) error {
 
 func (r *Repository) HandleDeleteRoom(c echo.Context) error {
 	id := c.Param("id")
-	if err := r.DB.DeleteRoom(id); err != nil {
+	err := r.DB.DeleteRoom(id)
+	if err != nil {
 		log.Println("Failed to delete room:", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, echo.Map{
 			"error": "Failed to delete room",

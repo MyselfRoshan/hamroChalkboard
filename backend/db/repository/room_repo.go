@@ -3,7 +3,6 @@ package repository
 import (
 	"backend/db/models"
 	"database/sql"
-	"fmt"
 	"log"
 
 	"github.com/google/uuid"
@@ -266,10 +265,6 @@ func (r *postgresDBRepo) DeleteRoom(id string) error {
 		return err
 	}
 	query := `DELETE FROM rooms WHERE id=$1`
-	fmt.Println()
-	fmt.Println("id", idTmp)
-	fmt.Println()
-
 	_, err = r.DB.Exec(query, idTmp)
 	if err != nil {
 		log.Println("Error deleting room:", err)

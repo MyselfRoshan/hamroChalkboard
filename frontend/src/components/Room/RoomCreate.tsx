@@ -55,7 +55,7 @@ export default function RoomCreate() {
     }
   };
   return (
-    <Card className="border-primary/20 bg-card/30 backdrop-blur-md">
+    <Card className="border-primary/20 bg-card/30">
       <CardHeader>
         <CardTitle>Create a New Room</CardTitle>
         <CardDescription>
