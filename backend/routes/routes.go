@@ -57,6 +57,7 @@ func Routes(cfg *config.AppConfig) *echo.Echo {
 	authApi.GET("/room", handlers.Repo.HandleGetRooms)
 	authApi.POST("/room", handlers.Repo.HandlePostRoom)
 	authApi.DELETE("/room/:id", handlers.Repo.HandleDeleteRoom)
+	authApi.PATCH("/room/:id", handlers.Repo.HandleUpdateRoom)
 	// mux.POST("/refresh-token", handlers.Repo.RefreshTokenHandler)
 	// restricted.POST("/refresh-token", handlers.RefreshTokenHandler)
 	// restricted.GET("/refresh-token", handlers.RefreshTokenHandler)

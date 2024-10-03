@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -79,5 +80,23 @@ func (r *Repository) HandleDeleteRoom(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "Room with id " + id + " deleted successfully",
+	})
+}
+
+func (r *Repository) HandleUpdateRoom(c echo.Context) error {
+	id := c.Param("id")
+	name := c.FormValue("name")
+	err := r.DB.UpdateRoom(&models.Room{
+		ID:   uuid.MustParse(id),
+		Name: name,
+	})
+	if err != nil {
+		log.Println("Failed to update room:", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, echo.Map{
+			"error": "Failed to update room",
+		})
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "Room with id " + id + " updated successfully",
 	})
 }
