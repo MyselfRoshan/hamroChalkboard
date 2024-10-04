@@ -267,6 +267,7 @@ func (r *postgresDBRepo) DeleteRoom(id string) error {
 	query := `DELETE FROM rooms WHERE id=$1`
 	_, err = r.DB.Exec(query, idTmp)
 	if err != nil {
+
 		log.Println("Error deleting room:", err)
 	}
 	return err
