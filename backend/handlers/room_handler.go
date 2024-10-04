@@ -84,7 +84,6 @@ func (r *Repository) HandleDeleteRoom(c echo.Context) error {
 }
 
 func (r *Repository) HandleUpdateRoom(c echo.Context) error {
-	// id := c.Param("id")
 	token := c.Get("user").(*jwt.Token)
 	user := token.Claims.(*models.UserClaims)
 	creator, err := r.DB.GetUserByUsername(user.Username)
