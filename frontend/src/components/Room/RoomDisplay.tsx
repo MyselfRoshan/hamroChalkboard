@@ -53,7 +53,7 @@ export function RoomDisplay({
 
   const { authFetch } = useAuth();
   const queryClient = useQueryClient();
-  const { mutateAsync } = useMutation({
+  const deleteRoomMutation = useMutation({
     mutationFn: async (roomId: number) => {
       const response = await authFetch(`${ROOM_URL}/${roomId}`, {
         method: "DELETE",
@@ -77,21 +77,49 @@ export function RoomDisplay({
     },
   });
 
-  const handleUpdateRoom = (roomId: number, newName: string) => {
-    setRooms((prevRooms: Room[]) =>
-      prevRooms.map((room) =>
-        room.id === roomId ? { ...room, name: newName } : room,
-      ),
-    );
+  const updateRoomMutation = useMutation({
+    mutationFn: async (roomId: number) => {
+      const response = await authFetch(`${ROOM_URL}/${roomId}`, {
+        method: "PATCH",
+      });
+      console.log(response);
+      return await response.json();
+    },
+    onSuccess: async (data) => {
+      queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      // const { message } = await data.json();
+      console.log(data);
+      console.log(data);
+
+      toast.success(data.message);
+    },
+
+    onError: async (err) => {
+      console.log(err);
+      toast.error("Failed to update room");
+      return;
+    },
+  });
+
+  const handleUpdateRoom = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    roomId: number,
+    newName: string,
+  ) => {
+    e.preventDefault();
+    try {
+      updateRoomMutation.mutateAsync(room.id);
+    } catch (err) {
+      console.log(err);
+    }
   };
-  // console.log(room);
   const handleDelete = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     roomId: number,
   ) => {
     e.preventDefault();
     try {
-      await mutateAsync(room.id);
+      await deleteRoomMutation.mutateAsync(room.id);
     } catch (error) {}
     // setRooms((prevRooms: Room[]) =>
     //   prevRooms.filter((room) => room.id !== roomId),
@@ -113,8 +141,9 @@ export function RoomDisplay({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() =>
+                onClick={(e) =>
                   handleUpdateRoom(
+                    e,
                     room.id,
                     prompt("Enter new room name") || room.name,
                   )
