@@ -1,4 +1,3 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "components/ui/avatar";
 import { Button } from "components/ui/button";
@@ -12,13 +11,11 @@ import {
 } from "components/ui/card";
 import { Input } from "components/ui/input";
 import { cn } from "lib/utils";
-import { ArrowRight, Clock, Pencil, Send, Trash, Users } from "lucide-react";
+import { ArrowRight, Clock, Send, Users } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
-import { useAuth } from "src/auth";
-import { ROOM_URL } from "src/utils/constants";
 import { timeAgo } from "src/utils/utils";
 import styles from "./index.module.css";
+import RoomHandler from "./RoomHandler";
 export type Room = {
   id: number;
   name: string;
@@ -50,81 +47,87 @@ export function RoomDisplay({
   setRooms,
 }: RoomCardProps) {
   const [inviteEmail, setInviteEmail] = useState("");
+  const [newRoomName, setNewRoomName] = useState<string>(room.name);
 
-  const { authFetch } = useAuth();
-  const queryClient = useQueryClient();
-  const deleteRoomMutation = useMutation({
-    mutationFn: async (roomId: number) => {
-      const response = await authFetch(`${ROOM_URL}/${roomId}`, {
-        method: "DELETE",
-      });
-      console.log(response);
-      return await response.json();
-    },
-    onSuccess: async (data) => {
-      queryClient.invalidateQueries({ queryKey: ["rooms"] });
-      // const { message } = await data.json();
-      console.log(data);
-      console.log(data);
+  // const { authFetch } = useAuth();
+  // const queryClient = useQueryClient();
+  // const deleteRoomMutation = useMutation({
+  //   mutationFn: async (roomId: number) => {
+  //     const response = await authFetch(`${ROOM_URL}/${roomId}`, {
+  //       method: "DELETE",
+  //     });
+  //     console.log(response);
+  //     return await response.json();
+  //   },
+  //   onSuccess: async (data) => {
+  //     queryClient.invalidateQueries({ queryKey: ["rooms"] });
+  //     // const { message } = await data.json();
+  //     console.log(data);
+  //     console.log(data);
 
-      toast.success(data.message);
-    },
+  //     toast.success(data.message);
+  //   },
 
-    onError: async (err) => {
-      console.log(err);
-      toast.error("Failed to delete room");
-      return;
-    },
-  });
+  //   onError: async (err) => {
+  //     console.log(err);
+  //     toast.error("Failed to delete room");
+  //     return;
+  //   },
+  // });
 
-  const updateRoomMutation = useMutation({
-    mutationFn: async (roomId: number) => {
-      const response = await authFetch(`${ROOM_URL}/${roomId}`, {
-        method: "PATCH",
-      });
-      console.log(response);
-      return await response.json();
-    },
-    onSuccess: async (data) => {
-      queryClient.invalidateQueries({ queryKey: ["rooms"] });
-      // const { message } = await data.json();
-      console.log(data);
-      console.log(data);
+  // const updateRoomMutation = useMutation({
+  //   mutationFn: async ({
+  //     roomId,
+  //     newName,
+  //   }: {
+  //     roomId: number;
+  //     newName: string;
+  //   }) => {
+  //     const response = await authFetch(`${ROOM_URL}/${roomId}`, {
+  //       method: "PATCH",
+  //       body: newName,
+  //     });
+  //     console.log(response);
+  //     return await response.json();
+  //   },
+  //   onSuccess: async (data) => {
+  //     queryClient.invalidateQueries({ queryKey: ["rooms"] });
+  //     // const { message } = await data.json();
+  //     console.log(data);
+  //     console.log(data);
 
-      toast.success(data.message);
-    },
+  //     toast.success(data.message);
+  //   },
 
-    onError: async (err) => {
-      console.log(err);
-      toast.error("Failed to update room");
-      return;
-    },
-  });
+  //   onError: async (err) => {
+  //     console.log(err);
+  //     toast.error("Failed to update room");
+  //     return;
+  //   },
+  // });
 
-  const handleUpdateRoom = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    roomId: number,
-    newName: string,
-  ) => {
-    e.preventDefault();
-    try {
-      updateRoomMutation.mutateAsync(room.id);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-  const handleDelete = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    roomId: number,
-  ) => {
-    e.preventDefault();
-    try {
-      await deleteRoomMutation.mutateAsync(room.id);
-    } catch (error) {}
-    // setRooms((prevRooms: Room[]) =>
-    //   prevRooms.filter((room) => room.id !== roomId),
-    // );
-  };
+  // const handleUpdateRoom = (
+  //   e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  //   newName: string,
+  // ) => {
+  //   e.preventDefault();
+  //   try {
+  //     updateRoomMutation.mutateAsync({ roomId: room.id, newName });
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
+  // const handleDelete = async (
+  //   e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  // ) => {
+  //   e.preventDefault();
+  //   try {
+  //     await deleteRoomMutation.mutateAsync(room.id);
+  //   } catch (error) {}
+  //   // setRooms((prevRooms: Room[]) =>
+  //   //   prevRooms.filter((room) => room.id !== roomId),
+  //   // );
+  // };
 
   const handleSendInvite = (roomId: number) => {
     console.log(`Inviting ${inviteEmail} to room ${roomId}`);
@@ -137,28 +140,7 @@ export function RoomDisplay({
         <CardTitle className="flex items-center justify-between">
           <span>{room.name}</span>
           {isCreator && (
-            <div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) =>
-                  handleUpdateRoom(
-                    e,
-                    room.id,
-                    prompt("Enter new room name") || room.name,
-                  )
-                }
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="destructiveHover"
-                size="sm"
-                onClick={(e) => handleDelete(e, room.id)}
-              >
-                <Trash className="h-4 w-4" />
-              </Button>
-            </div>
+            <RoomHandler roomId={room.id} setNewRoomName={setNewRoomName} />
           )}
         </CardTitle>
         <CardDescription>

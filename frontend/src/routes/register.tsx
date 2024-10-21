@@ -121,7 +121,7 @@ export default function Register() {
                 Sign up to start collaborating on Hamro Chalkboard.
               </CardDescription>
             </CardHeader>
-            <form onSubmit={async (e) => handleSubmit(e)}>
+            <form onSubmit={handleSubmit}>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label className="text-white" htmlFor="name">

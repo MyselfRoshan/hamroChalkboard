@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -63,7 +64,7 @@ func (r *Repository) HandleGetRooms(c echo.Context) error {
 		})
 	}
 
-	fmt.Println(rooms)
+	// fmt.Println(rooms)
 	return c.JSON(http.StatusOK, echo.Map{
 		"rooms": rooms,
 	})
@@ -84,19 +85,29 @@ func (r *Repository) HandleDeleteRoom(c echo.Context) error {
 }
 
 func (r *Repository) HandleUpdateRoom(c echo.Context) error {
-	token := c.Get("user").(*jwt.Token)
-	user := token.Claims.(*models.UserClaims)
-	creator, err := r.DB.GetUserByUsername(user.Username)
+	// token := c.Get("user").(*jwt.Token)
+	// user := token.Claims.(*models.UserClaims)
+	// _, err := r.DB.GetUserByUsername(user.Username)
+	// if err != nil {
+	// 	log.Println("Failed to get rooms:", err)
+	// 	return echo.NewHTTPError(http.StatusInternalServerError, echo.Map{
+	// 		"error": "Failed to fetch rooms",
+	// 	})
+	// }
+	name := c.FormValue("new_name")
+	id := c.FormValue("id")
+	fmt.Println("new_name: ", name, "id: ", id)
+	ID, err := uuid.Parse(id)
 	if err != nil {
-		log.Println("Failed to get rooms:", err)
+		log.Println("Failed to update room:", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, echo.Map{
-			"error": "Failed to fetch rooms",
+			"error": "Failed to update room",
 		})
 	}
-	name := c.FormValue("name")
 	err = r.DB.UpdateRoom(&models.Room{
-		ID:        creator.ID,
+		ID:        ID,
 		Name:      name,
+		IsActive:  true,
 		UpdatedAt: models.NullTime{NullTime: sql.NullTime{Time: time.Now(), Valid: true}},
 	})
 	if err != nil {
@@ -106,6 +117,7 @@ func (r *Repository) HandleUpdateRoom(c echo.Context) error {
 		})
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"message": "Room with id " + creator.ID.String() + " updated successfully",
+		"message": "Room with id " + id + " updated successfully",
+		"name":    name,
 	})
 }

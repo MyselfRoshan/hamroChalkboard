@@ -16,9 +16,8 @@ import { RoomValidation as roomValidation } from "src/utils/validation/roomValid
 
 type RoomCreateProps = {};
 export default function RoomCreate() {
-  //   const [newRoomName, setNewRoomName] = useState("");
   const queryClient = useQueryClient();
-  const { token, authFetch } = useAuth();
+  const { authFetch } = useAuth();
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (formData: FormData) => {
       return await authFetch(ROOM_URL, {
