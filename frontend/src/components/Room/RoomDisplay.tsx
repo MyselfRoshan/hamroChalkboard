@@ -140,7 +140,12 @@ export function RoomDisplay({
         <CardTitle className="flex items-center justify-between">
           <span>{room.name}</span>
           {isCreator && (
-            <RoomHandler roomId={room.id} setNewRoomName={setNewRoomName} />
+            <RoomHandler
+              roomId={room.id}
+              roomName={room.name}
+              newRoomName={newRoomName}
+              setNewRoomName={setNewRoomName}
+            />
           )}
         </CardTitle>
         <CardDescription>
