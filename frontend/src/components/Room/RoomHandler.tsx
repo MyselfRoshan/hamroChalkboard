@@ -19,12 +19,15 @@ import { ROOM_URL } from "src/utils/constants";
 
 type ActionHandlerProps = {
   roomId: number;
-  // setNewRoomName: (name: string) => void;
+  roomName: string;
+  newRoomName: string;
   setNewRoomName: React.Dispatch<React.SetStateAction<string>>;
 };
 
 export default function RoomHandler({
   roomId,
+  roomName,
+  newRoomName,
   setNewRoomName,
 }: ActionHandlerProps) {
   const { authFetch } = useAuth();
@@ -61,8 +64,10 @@ export default function RoomHandler({
     onSuccess: async (data) => {
       if (data.status === 200) {
         const { message, name } = await data.json();
-        setNewRoomName(name);
-        toast.success(message);
+        // setNewRoomName(name);
+        toast.success(
+          `Room name updated from '${roomName}' to '${name}' successfully`,
+        );
         queryClient.invalidateQueries({ queryKey: ["rooms"] });
         router.invalidate();
       }
@@ -81,15 +86,24 @@ export default function RoomHandler({
     }
   };
 
+  // let newRoomName: string = "";
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
+    // newRoomName = formData.get("new_name") as string;
+    console.log(formData.get("new_name"), roomName);
     try {
+      console.log(formData);
       await updateMutation.mutateAsync(formData);
     } catch (error) {
       console.error(error);
     }
   };
+
+  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewRoomName(e.target.value);
+  };
+  console.log(newRoomName, roomName);
 
   return (
     <div className="flex space-x-2">
@@ -114,12 +128,19 @@ export default function RoomHandler({
               hidden
               readOnly
             />
-            <Input name="new_name" className="mt-4" />
+            <Input
+              value={newRoomName}
+              onChange={handleOnChange}
+              name="new_name"
+              className="mt-4"
+            />
             <DialogFooter className="mt-4">
               <DialogClose asChild>
                 <Button variant="outline">Cancel</Button>
               </DialogClose>
-              <Button>Update</Button>
+              <Button disabled={newRoomName === "" || newRoomName === roomName}>
+                Update
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
