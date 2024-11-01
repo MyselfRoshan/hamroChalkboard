@@ -4,8 +4,6 @@ include .env
 
 DB_URL=postgresql://${DB_USER}:${DB_PASSWORD}@localhost:5432/${DB_NAME}?sslmode=disable
 
-.PHONY: help build logs frontend stop restartf api dbstart backend
-
 help:
 	@echo "Available targets:"
 	@echo "  build       - Build Docker containers"
@@ -19,43 +17,54 @@ help:
 	@echo "  backend     - Start Database and Run API"
 
 # FRONTEND
+.PHONY: build
 build:
 	docker compose build
 
+.PHONY: logs
 logs:
 	docker compose logs -f
 
+.PHONY: clean
 clean:
 	docker compose down -v --remove-orphans
 
-# frontend:
-# 	docker compose up --watch frontend
+.PHONY: frontend
 frontend:
 	cd ./frontend && pnpm dev
 
+.PHONY: stop
 stop:
 	docker compose down
 
+.PHONY: restartf
 restartf: stop frontend
 
 # BACKEND
+.PHONY: api
 api:
 	cd ./backend && air
 
+.PHONY: dbstart
 dbstart:
 	docker compose up hc_db hc_pgadmin -d
 
-backend: dbstart api
+.PHONY: backend
+backend: stop dbstart api
 
 # Migrations
+.PHONY: migrate
 migrateUp:
-	migrate -path "${MIGRATION_PATH}" -database "${DB_URL}" -verbose up
+	@migrate -path $(MIGRATION_PATH) -database $(DB_URL) -verbose up
 
+.PHONY: migrateDown
 migrateDown:
-	migrate -path "${MIGRATION_PATH}" -database "${DB_URL}" -verbose down
+	@migrate -path $(MIGRATIONS_PATH) -database $(DB_URL) -verbose down
 
+.PHONY: migrateForce
 migrateForce:
-	migrate -path "${MIGRATION_PATH}" -database "${DB_URL}" force $(version)
+	@migrate -path "${MIGRATION_PATH}" -database "${DB_URL}" force $(filter-out $@,$(MAKECMDGOALS))
 
-migrateCreate:
-	migrate create -ext sql -dir "${MIGRATION_PATH}" -seq $(fileName)
+.PHONY: migration
+migration:
+	@migrate create -ext sql -dir $(MIGRATION_PATH) -seq $(filter-out $@,$(MAKECMDGOALS))

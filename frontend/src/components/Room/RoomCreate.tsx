@@ -14,7 +14,6 @@ import { useAuth } from "src/auth";
 import { ROOM_URL } from "src/utils/constants";
 import { RoomValidation as roomValidation } from "src/utils/validation/roomValidation";
 
-type RoomCreateProps = {};
 export default function RoomCreate() {
   const queryClient = useQueryClient();
   const { authFetch } = useAuth();

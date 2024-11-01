@@ -1204,6 +1204,7 @@ export default function Canvas({ settings, size }: CanvasProps) {
   //   setZoom(newZoom)
   //   drawCanvas(ctx)
   // }
+  /* TODO: FIX ZOOM along with PAN */
   const handleWheel = (e: WheelEvent<HTMLCanvasElement>) => {
     e.preventDefault();
     const ctx = ctxRef.current!;
