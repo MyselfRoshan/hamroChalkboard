@@ -11,8 +11,8 @@ import (
 
 type RoomRepository interface {
 	GetAllRooms() ([]*models.RoomResponse, error)
-	GetRoomsByCreatorID(uuid uuid.UUID) ([]*models.RoomResponse, error)
-	GetRoomByID(id string) (*models.Room, error)
+	GetRoomsByCreatorID(id uuid.UUID) ([]*models.RoomResponse, error)
+	GetRoomByID(id uuid.UUID) (*models.Room, error)
 	GetRoomByCreatorID(uuid string) (*models.Room, error)
 	CreateRoom(room *models.Room) error
 	UpdateRoom(room *models.Room) error
@@ -212,7 +212,7 @@ func (r *postgresDBRepo) GetRoomsByCreatorID(creatorID uuid.UUID) ([]*models.Roo
 	}
 	return rooms, nil
 }
-func (r *postgresDBRepo) GetRoomByID(id string) (*models.Room, error) {
+func (r *postgresDBRepo) GetRoomByID(id uuid.UUID) (*models.Room, error) {
 	query := `SELECT id, name, is_active, creator_id, created_at, updated_at
 			  FROM rooms WHERE id=$1`
 	room := &models.Room{}

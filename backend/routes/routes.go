@@ -16,6 +16,7 @@ func Routes(cfg *config.AppConfig) *echo.Echo {
 	mux := echo.New()
 
 	// Middlewares
+	mux.Pre(middleware.RemoveTrailingSlash())
 	mux.Use(middleware.Logger())
 	mux.Use(middleware.Recover())
 	mux.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -58,6 +59,9 @@ func Routes(cfg *config.AppConfig) *echo.Echo {
 	authApi.POST("/room", handlers.Repo.HandlePostRoom)
 	authApi.DELETE("/room/:id", handlers.Repo.HandleDeleteRoom)
 	authApi.PATCH("/room/:id", handlers.Repo.HandleUpdateRoom)
+
+	authApi.GET("/room/exists/:id", handlers.Repo.HandleCheckRoomExists)
+
 	// mux.POST("/refresh-token", handlers.Repo.RefreshTokenHandler)
 	// restricted.POST("/refresh-token", handlers.RefreshTokenHandler)
 	// restricted.GET("/refresh-token", handlers.RefreshTokenHandler)

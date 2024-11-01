@@ -107,7 +107,7 @@ export default function LoginPage() {
 
   return (
     <div className="grid min-h-screen place-items-center bg-background p-4 text-foreground">
-      <div className="flex w-full flex-col overflow-hidden rounded-lg bg-login-image shadow-xl sm:max-w-4xl md:flex-row">
+      <div className="flex w-full flex-col overflow-hidden rounded-lg bg-login-image bg-right shadow-xl sm:max-w-4xl md:flex-row">
         {/* Right side - Background */}
         <div className="relative hidden w-full md:block md:w-1/2">
           <div className="absolute inset-0 flex items-center justify-center bg-primary/15">

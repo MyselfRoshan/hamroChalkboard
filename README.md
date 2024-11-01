@@ -28,5 +28,5 @@
     > -   [x] Token Validation
     > -   [x] Token Refresh
     > -   [Youtube ](https://www.youtube.com/watch?v=AcYF18oGn6Y)
--   [ ] Database creation
 -   [ ] Create a room for real time socket communication to show the same drawing
+    > -   [ ] [Tutorial](https://ably.com/blog/websockets-react-tutorial)

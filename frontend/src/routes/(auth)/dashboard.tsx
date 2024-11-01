@@ -22,8 +22,8 @@ import { cn } from "lib/utils";
 import { LayoutGrid, List } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "src/auth";
+import { Room } from "src/components/Room";
 import RoomCreate from "src/components/Room/RoomCreate";
-import { Room, RoomDisplay } from "src/components/Room/RoomDisplay";
 import Sidebar from "src/components/Sidebar";
 import { ROOM_URL } from "src/utils/constants";
 
@@ -153,28 +153,19 @@ export default function DashboardPage() {
                     viewMode === "grid"
                       ? "grid grid-cols-1 gap-4 md:grid-cols-2"
                       : // ? "grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
-                        "grid gap-4"
+                        "space-y-4"
                   }
                 >
                   {rms !== undefined &&
                     rms?.rooms &&
                     rms?.rooms.map((room: Room) => (
-                      <RoomDisplay
+                      <Room
                         key={room.id}
                         room={room}
                         isCreator={true}
                         setRooms={setRooms}
                       />
                     ))}
-
-                  {/* {rms?.map((room: Room) => (
-                    <RoomDisplay
-                      key={room.id}
-                      room={room}
-                      isCreator={true}
-                      setRooms={setRooms}
-                    />
-                  ))} */}
                 </div>
               </ScrollArea>
             </TabsContent>
@@ -183,10 +174,22 @@ export default function DashboardPage() {
                 <div
                   className={
                     viewMode === "grid"
-                      ? "grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
-                      : "space-y-4"
+                      ? "grid grid-cols-1 gap-4 md:grid-cols-2"
+                      : // ? "grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
+                        "space-y-4"
                   }
                 >
+                  {rms !== undefined &&
+                    rms?.rooms &&
+                    rms?.rooms.map((room: Room) => (
+                      <Room
+                        key={room.id}
+                        room={room}
+                        isCreator={true}
+                        setRooms={setRooms}
+                      />
+                    ))}
+                  {/* TODO : Display all participating rooms  */}
                   {/* {participatingRooms.map((room) => (
                     <RoomDisplay
                       key={room.id}

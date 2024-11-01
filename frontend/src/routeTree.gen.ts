@@ -15,14 +15,16 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRoute } from './routes/__root'
 import { Route as RegisterImport } from './routes/register'
 import { Route as LoginImport } from './routes/login'
+import { Route as RoomIndexImport } from './routes/room/index'
+import { Route as RoomRoomIdImport } from './routes/room/$roomId'
 import { Route as authDashboardImport } from './routes/(auth)/dashboard'
 
 // Create Virtual Routes
 
 const FeaturesLazyImport = createFileRoute('/features')()
-const DrawLazyImport = createFileRoute('/draw')()
 const ContactLazyImport = createFileRoute('/contact')()
 const AboutLazyImport = createFileRoute('/about')()
+const R404LazyImport = createFileRoute('/404')()
 const IndexLazyImport = createFileRoute('/')()
 
 // Create/Update Routes
@@ -31,11 +33,6 @@ const FeaturesLazyRoute = FeaturesLazyImport.update({
   path: '/features',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/features.lazy').then((d) => d.Route))
-
-const DrawLazyRoute = DrawLazyImport.update({
-  path: '/draw',
-  getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/draw.lazy').then((d) => d.Route))
 
 const ContactLazyRoute = ContactLazyImport.update({
   path: '/contact',
@@ -46,6 +43,11 @@ const AboutLazyRoute = AboutLazyImport.update({
   path: '/about',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/about.lazy').then((d) => d.Route))
+
+const R404LazyRoute = R404LazyImport.update({
+  path: '/404',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/404.lazy').then((d) => d.Route))
 
 const RegisterRoute = RegisterImport.update({
   path: '/register',
@@ -61,6 +63,16 @@ const IndexLazyRoute = IndexLazyImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+
+const RoomIndexRoute = RoomIndexImport.update({
+  path: '/room/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const RoomRoomIdRoute = RoomRoomIdImport.update({
+  path: '/room/$roomId',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const authDashboardRoute = authDashboardImport.update({
   path: '/dashboard',
@@ -92,6 +104,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterImport
       parentRoute: typeof rootRoute
     }
+    '/404': {
+      id: '/404'
+      path: '/404'
+      fullPath: '/404'
+      preLoaderRoute: typeof R404LazyImport
+      parentRoute: typeof rootRoute
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -104,13 +123,6 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactLazyImport
-      parentRoute: typeof rootRoute
-    }
-    '/draw': {
-      id: '/draw'
-      path: '/draw'
-      fullPath: '/draw'
-      preLoaderRoute: typeof DrawLazyImport
       parentRoute: typeof rootRoute
     }
     '/features': {
@@ -127,6 +139,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authDashboardImport
       parentRoute: typeof rootRoute
     }
+    '/room/$roomId': {
+      id: '/room/$roomId'
+      path: '/room/$roomId'
+      fullPath: '/room/$roomId'
+      preLoaderRoute: typeof RoomRoomIdImport
+      parentRoute: typeof rootRoute
+    }
+    '/room/': {
+      id: '/room/'
+      path: '/room'
+      fullPath: '/room'
+      preLoaderRoute: typeof RoomIndexImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -136,22 +162,26 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/404': typeof R404LazyRoute
   '/about': typeof AboutLazyRoute
   '/contact': typeof ContactLazyRoute
-  '/draw': typeof DrawLazyRoute
   '/features': typeof FeaturesLazyRoute
   '/dashboard': typeof authDashboardRoute
+  '/room/$roomId': typeof RoomRoomIdRoute
+  '/room': typeof RoomIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/404': typeof R404LazyRoute
   '/about': typeof AboutLazyRoute
   '/contact': typeof ContactLazyRoute
-  '/draw': typeof DrawLazyRoute
   '/features': typeof FeaturesLazyRoute
   '/dashboard': typeof authDashboardRoute
+  '/room/$roomId': typeof RoomRoomIdRoute
+  '/room': typeof RoomIndexRoute
 }
 
 export interface FileRoutesById {
@@ -159,11 +189,13 @@ export interface FileRoutesById {
   '/': typeof IndexLazyRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/404': typeof R404LazyRoute
   '/about': typeof AboutLazyRoute
   '/contact': typeof ContactLazyRoute
-  '/draw': typeof DrawLazyRoute
   '/features': typeof FeaturesLazyRoute
   '/dashboard': typeof authDashboardRoute
+  '/room/$roomId': typeof RoomRoomIdRoute
+  '/room/': typeof RoomIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -172,31 +204,37 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
+    | '/404'
     | '/about'
     | '/contact'
-    | '/draw'
     | '/features'
     | '/dashboard'
+    | '/room/$roomId'
+    | '/room'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/register'
+    | '/404'
     | '/about'
     | '/contact'
-    | '/draw'
     | '/features'
     | '/dashboard'
+    | '/room/$roomId'
+    | '/room'
   id:
     | '__root__'
     | '/'
     | '/login'
     | '/register'
+    | '/404'
     | '/about'
     | '/contact'
-    | '/draw'
     | '/features'
     | '/dashboard'
+    | '/room/$roomId'
+    | '/room/'
   fileRoutesById: FileRoutesById
 }
 
@@ -204,22 +242,26 @@ export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  R404LazyRoute: typeof R404LazyRoute
   AboutLazyRoute: typeof AboutLazyRoute
   ContactLazyRoute: typeof ContactLazyRoute
-  DrawLazyRoute: typeof DrawLazyRoute
   FeaturesLazyRoute: typeof FeaturesLazyRoute
   authDashboardRoute: typeof authDashboardRoute
+  RoomRoomIdRoute: typeof RoomRoomIdRoute
+  RoomIndexRoute: typeof RoomIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  R404LazyRoute: R404LazyRoute,
   AboutLazyRoute: AboutLazyRoute,
   ContactLazyRoute: ContactLazyRoute,
-  DrawLazyRoute: DrawLazyRoute,
   FeaturesLazyRoute: FeaturesLazyRoute,
   authDashboardRoute: authDashboardRoute,
+  RoomRoomIdRoute: RoomRoomIdRoute,
+  RoomIndexRoute: RoomIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -237,11 +279,13 @@ export const routeTree = rootRoute
         "/",
         "/login",
         "/register",
+        "/404",
         "/about",
         "/contact",
-        "/draw",
         "/features",
-        "/dashboard"
+        "/dashboard",
+        "/room/$roomId",
+        "/room/"
       ]
     },
     "/": {
@@ -253,20 +297,26 @@ export const routeTree = rootRoute
     "/register": {
       "filePath": "register.tsx"
     },
+    "/404": {
+      "filePath": "404.lazy.tsx"
+    },
     "/about": {
       "filePath": "about.lazy.tsx"
     },
     "/contact": {
       "filePath": "contact.lazy.tsx"
     },
-    "/draw": {
-      "filePath": "draw.lazy.tsx"
-    },
     "/features": {
       "filePath": "features.lazy.tsx"
     },
     "/dashboard": {
       "filePath": "(auth)/dashboard.tsx"
+    },
+    "/room/$roomId": {
+      "filePath": "room/$roomId.tsx"
+    },
+    "/room/": {
+      "filePath": "room/index.tsx"
     }
   }
 }

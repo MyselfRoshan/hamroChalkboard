@@ -85,19 +85,10 @@ func (r *Repository) HandleDeleteRoom(c echo.Context) error {
 }
 
 func (r *Repository) HandleUpdateRoom(c echo.Context) error {
-	// token := c.Get("user").(*jwt.Token)
-	// user := token.Claims.(*models.UserClaims)
-	// _, err := r.DB.GetUserByUsername(user.Username)
-	// if err != nil {
-	// 	log.Println("Failed to get rooms:", err)
-	// 	return echo.NewHTTPError(http.StatusInternalServerError, echo.Map{
-	// 		"error": "Failed to fetch rooms",
-	// 	})
-	// }
+
 	name := c.FormValue("new_name")
-	id := c.FormValue("id")
-	fmt.Println("new_name: ", name, "id: ", id)
-	ID, err := uuid.Parse(id)
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		log.Println("Failed to update room:", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, echo.Map{
@@ -105,7 +96,7 @@ func (r *Repository) HandleUpdateRoom(c echo.Context) error {
 		})
 	}
 	err = r.DB.UpdateRoom(&models.Room{
-		ID:        ID,
+		ID:        id,
 		Name:      name,
 		IsActive:  true,
 		UpdatedAt: models.NullTime{NullTime: sql.NullTime{Time: time.Now(), Valid: true}},
@@ -117,7 +108,33 @@ func (r *Repository) HandleUpdateRoom(c echo.Context) error {
 		})
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"message": "Room with id " + id + " updated successfully",
+		"message": "Room with id " + id.String() + " updated successfully",
 		"name":    name,
+	})
+}
+
+func (r *Repository) HandleCheckRoomExists(c echo.Context) error {
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		log.Println("Failed to check room exists:", err)
+		return echo.NewHTTPError(http.StatusNotFound, echo.Map{
+			"error": "Room not found",
+		})
+	}
+	room, err := r.DB.GetRoomByID(id)
+	if err != nil {
+		log.Println("Failed to check room exists:", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, echo.Map{
+			"error": "Room not found",
+		})
+	}
+	if room == nil {
+		return c.JSON(http.StatusNotFound, echo.Map{
+			"error": "Room not found",
+		})
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"exists": true,
 	})
 }
