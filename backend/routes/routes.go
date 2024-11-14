@@ -3,7 +3,6 @@ package routes
 import (
 	"backend/config"
 	"backend/handlers"
-	"fmt"
 	"net/http"
 	"net/url"
 
@@ -57,7 +56,7 @@ func Routes(cfg *config.AppConfig) *echo.Echo {
 	}
 	apiVersioned := mux.Group(apiVersionedStr)
 	// Room Routes
-	fmt.Println(apiVersioned, apiVersionedStr)
+	// fmt.Println(apiVersioned, apiVersionedStr)
 	roomApi := apiVersioned.Group("/room")
 	roomApi.Use(echojwt.WithConfig(config))
 	roomApi.GET("", handlers.Repo.HandleGetRooms)
@@ -69,10 +68,10 @@ func Routes(cfg *config.AppConfig) *echo.Echo {
 
 	// Websocket Routes
 	socketApi := apiVersioned.Group("/ws")
-	fmt.Println(socketApi)
+	// fmt.Println(socketApi)
 	// socketApi.Use(echojwt.WithConfig(config))
 	// cs := handlers.Repo.NewRoomServer()
 	// socketApi.GET("/:room-id", cs.SubscribeHandler)
-	socketApi.GET("/:room-id", handlers.Repo.HandleGetSocket)
+	socketApi.GET("/:roomId", handlers.Repo.HandleGetSocket)
 	return mux
 }
