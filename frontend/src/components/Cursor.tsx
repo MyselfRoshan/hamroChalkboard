@@ -16,10 +16,7 @@ export function Cursor({
   const animateCursor = React.useCallback((point: number[]) => {
     const elm = rCursor.current;
     if (!elm) return;
-    elm.style.setProperty(
-      "transform",
-      `translate(${point[0]}px, ${point[1]}px)`,
-    );
+    elm.style.setProperty("translate", `${point[0]}px ${point[1]}px`);
   }, []);
 
   const onPointMove = usePerfectCursor(animateCursor);
@@ -48,7 +45,7 @@ export function Cursor({
           <path d="m13 10.814v11.188l2.969-2.866.428-.139h4.768z" />
         </g>
       </svg>
-      <span className="">{username}</span>
+      <span className="text-center">{username}</span>
     </div>
   );
 }

@@ -1,6 +1,5 @@
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
-import { createRootRoute, Outlet } from "@tanstack/react-router"
-import Notification from "src/components/Notification"
+import { createRootRoute, Outlet } from "@tanstack/react-router";
+import Notification from "src/components/Notification";
 export const Route = createRootRoute({
   component: () => {
     return (
@@ -9,8 +8,8 @@ export const Route = createRootRoute({
         <Notification position="top-center" />
 
         {/* <TanStackRouterDevtools position="bottom-left" /> */}
-        <ReactQueryDevtools buttonPosition="bottom-right" />
+        {/* <ReactQueryDevtools buttonPosition="bottom-right" /> */}
       </>
-    )
+    );
   },
-})
+});

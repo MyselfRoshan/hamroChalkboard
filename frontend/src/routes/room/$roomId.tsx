@@ -14,6 +14,7 @@ export const Route = createFileRoute("/room/$roomId")({
     <NotFound
       title="404 - Room Not Found"
       message="Oops! The room you're looking for doesn't exist."
+      redirect="/dashboard"
     />
   ),
   component: () => {
@@ -60,19 +61,14 @@ export const Route = createFileRoute("/room/$roomId")({
     // console.log(user?.username);
 
     return (
-      <div className="grid">
+      <section className="grid">
         {/* <Component /> */}
         <HistoryProvider>
-          <Canvas
-            boardId="board"
-            settings={settings}
-            size={size}
-            roomId={roomId}
-          />
+          <Canvas settings={settings} size={size} roomId={roomId} />
         </HistoryProvider>
         {/* <CanvasT width={size.width} height={size.height} /> */}
         {/* <ColorPicker color={color} onChange={setColor} /> */}
-      </div>
+      </section>
     );
   },
 });

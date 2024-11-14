@@ -5,11 +5,13 @@ import { AlertCircle } from "lucide-react";
 interface NotFoundProps {
   title?: string;
   message?: string;
+  redirect?: string;
 }
 
 export default function NotFound({
   title = "404 - Page Not Found",
   message = "Oops! The page you're looking for doesn't exist.",
+  redirect: redirectURL = "/",
 }: NotFoundProps) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background text-foreground">
@@ -17,7 +19,9 @@ export default function NotFound({
       <h1 className="mb-2 text-4xl font-bold">{title}</h1>
       <p className="mb-8 max-w-md text-center text-xl">{message}</p>
       <Button asChild>
-        <Link to="/">Go back to homepage</Link>
+        <Link to={redirectURL}>
+          Go back to {redirectURL === "/" ? "homepage" : "dashboard"}
+        </Link>
       </Button>
     </div>
   );
