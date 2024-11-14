@@ -26,7 +26,6 @@ import { Room } from "src/components/Room";
 import RoomCreate from "src/components/Room/RoomCreate";
 import Sidebar from "src/components/Sidebar";
 import { ROOM_URL } from "src/utils/constants";
-
 // Mock user data
 const currentUser = {
   id: 1,
@@ -104,7 +103,7 @@ export default function DashboardPage() {
     },
   });
   const rms = query.data;
-  console.log("rooms", rms);
+
   return (
     <div
       className={cn(

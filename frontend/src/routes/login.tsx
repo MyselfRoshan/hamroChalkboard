@@ -45,7 +45,6 @@ export default function LoginPage() {
   const router = useRouter();
   const search = Route.useSearch();
   const [showPassword, setShowPassword] = useState(false);
-  console.log(AUTH_URL);
 
   const { mutateAsync } = useMutation({
     mutationKey: ["login"],
@@ -107,7 +106,7 @@ export default function LoginPage() {
 
   return (
     <div className="grid min-h-screen place-items-center bg-background p-4 text-foreground">
-      <div className="flex w-full flex-col overflow-hidden rounded-lg bg-login-image bg-right shadow-xl sm:max-w-4xl md:flex-row">
+      <div className="bg-forgot-password-image flex w-full flex-col overflow-hidden rounded-lg bg-right shadow-xl sm:max-w-4xl md:flex-row">
         {/* Right side - Background */}
         <div className="relative hidden w-full md:block md:w-1/2">
           <div className="absolute inset-0 flex items-center justify-center bg-primary/15">
@@ -187,9 +186,12 @@ export default function LoginPage() {
                     <Checkbox id="remember" />
                     <span className="text-sm">Remember me</span>
                   </Label>
-                  <a href="#" className="text-sm text-primary hover:underline">
+                  <Link
+                    to="/forgot_password"
+                    className="text-sm text-primary hover:underline"
+                  >
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
               </CardContent>
               <CardFooter className="flex flex-wrap gap-3">

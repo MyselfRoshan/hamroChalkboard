@@ -18,9 +18,10 @@ import { ROOM_URL } from "src/utils/constants";
 
 type RoomDeleteProps = {
   roomId: number;
+  roomName: string;
 };
 
-export default function RoomDelete({ roomId }: RoomDeleteProps) {
+export default function RoomDelete({ roomId, roomName }: RoomDeleteProps) {
   const { authFetch } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -33,7 +34,7 @@ export default function RoomDelete({ roomId }: RoomDeleteProps) {
     onSuccess: async (data) => {
       if (data.status === 200) {
         const { message } = await data.json();
-        toast.success(message);
+        toast.success(`Room '${roomName}' deleted successfully`);
         queryClient.invalidateQueries({ queryKey: ["rooms"] });
         router.invalidate();
       }
@@ -49,6 +50,7 @@ export default function RoomDelete({ roomId }: RoomDeleteProps) {
       await mutateAsync();
     } catch (error) {
       console.error(error);
+      toast.error("Failed to delete room");
     }
   };
 

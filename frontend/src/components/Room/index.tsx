@@ -50,58 +50,52 @@ export function Room({ room, isCreator = false, setRooms }: RoomCardProps) {
   return (
     <Card className="grid border-primary/20 bg-background/50">
       <CardHeader>
-        <CardTitle className="break-words">
-          {isCreator && (
-            <div className="flex justify-end gap-2">
-              <RoomUpdate
-                roomId={room.id}
-                roomName={room.name}
-                newRoomName={newRoomName}
-                setNewRoomName={setNewRoomName}
-              />
-              <RoomDelete roomId={room.id} />
-              <RoomShare roomId={room.id} />
-            </div>
-          )}
-          {room.name}
-        </CardTitle>
-        <CardDescription>
-          <div className="flex items-center">
-            <Users className="mr-1 h-4 w-4" />
-            <span className="mr-4">
-              {room.participants ? room.participants.length : 0} participants
-            </span>
-            <Clock className="mr-1 h-4 w-4" />
-            <span>{timeAgo(room.created_at)}</span>
+        {isCreator && (
+          <div className="flex justify-end gap-2">
+            <RoomUpdate
+              roomId={room.id}
+              roomName={room.name}
+              newRoomName={newRoomName}
+              setNewRoomName={setNewRoomName}
+            />
+            <RoomDelete roomId={room.id} roomName={room.name} />
+            <RoomShare roomId={room.id} roomName={room.name} />
           </div>
+        )}
+        <CardTitle className="break-all">{room.name}</CardTitle>
+        <CardDescription className="flex items-center">
+          <Users className="mr-1 h-4 w-4" />
+          <span className="mr-4">
+            {room.participants ? room.participants.length : 0} participants
+          </span>
+          <Clock className="mr-1 h-4 w-4" />
+          <span>{timeAgo(room.created_at)}</span>
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className={cn(styles.avatarList)}>
-          {room.participants &&
-            room.participants.slice(0, 5).map((participant) => (
-              <Avatar key={participant.id} className={cn(styles.avatar)}>
-                <Link to="/" className={styles.avatarLink}>
-                  <AvatarImage
-                    src={participant.avatar}
-                    alt={participant.name}
-                    className={styles.avatarImg}
-                  />
-                  <AvatarFallback
-                    style={{ backgroundColor: getRandomPastelColor() }}
-                    className="text-lg font-bold"
-                  >
-                    {participant.name.charAt(0)}
-                  </AvatarFallback>
-                </Link>
-              </Avatar>
-            ))}
-          {room.participants && room.participants.length > 5 && (
-            <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-primary text-xs font-medium text-primary-foreground">
-              +{room.participants.length - 5}
-            </div>
-          )}
-        </div>
+      <CardContent className={cn(styles.avatarList)}>
+        {room.participants &&
+          room.participants.slice(0, 5).map((participant) => (
+            <Avatar key={participant.id} className={cn(styles.avatar)}>
+              <Link to="/" className={styles.avatarLink}>
+                <AvatarImage
+                  src={participant.avatar}
+                  alt={participant.name}
+                  className={styles.avatarImg}
+                />
+                <AvatarFallback
+                  style={{ backgroundColor: getRandomPastelColor() }}
+                  className="text-lg font-bold"
+                >
+                  {participant.name.charAt(0)}
+                </AvatarFallback>
+              </Link>
+            </Avatar>
+          ))}
+        {room.participants && room.participants.length > 5 && (
+          <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-primary text-xs font-medium text-primary-foreground">
+            +{room.participants.length - 5}
+          </span>
+        )}
       </CardContent>
       <CardFooter className="self-end">
         <Button asChild className="mt-auto w-full">

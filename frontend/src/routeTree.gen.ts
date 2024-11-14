@@ -13,8 +13,10 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as ResetpasswordImport } from './routes/reset_password'
 import { Route as RegisterImport } from './routes/register'
 import { Route as LoginImport } from './routes/login'
+import { Route as ForgotpasswordImport } from './routes/forgot_password'
 import { Route as RoomIndexImport } from './routes/room/index'
 import { Route as RoomRoomIdImport } from './routes/room/$roomId'
 import { Route as authDashboardImport } from './routes/(auth)/dashboard'
@@ -49,6 +51,11 @@ const R404LazyRoute = R404LazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/404.lazy').then((d) => d.Route))
 
+const ResetpasswordRoute = ResetpasswordImport.update({
+  path: '/reset_password',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const RegisterRoute = RegisterImport.update({
   path: '/register',
   getParentRoute: () => rootRoute,
@@ -56,6 +63,11 @@ const RegisterRoute = RegisterImport.update({
 
 const LoginRoute = LoginImport.update({
   path: '/login',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ForgotpasswordRoute = ForgotpasswordImport.update({
+  path: '/forgot_password',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -90,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/forgot_password': {
+      id: '/forgot_password'
+      path: '/forgot_password'
+      fullPath: '/forgot_password'
+      preLoaderRoute: typeof ForgotpasswordImport
+      parentRoute: typeof rootRoute
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -102,6 +121,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterImport
+      parentRoute: typeof rootRoute
+    }
+    '/reset_password': {
+      id: '/reset_password'
+      path: '/reset_password'
+      fullPath: '/reset_password'
+      preLoaderRoute: typeof ResetpasswordImport
       parentRoute: typeof rootRoute
     }
     '/404': {
@@ -160,8 +186,10 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
+  '/forgot_password': typeof ForgotpasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/reset_password': typeof ResetpasswordRoute
   '/404': typeof R404LazyRoute
   '/about': typeof AboutLazyRoute
   '/contact': typeof ContactLazyRoute
@@ -173,8 +201,10 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
+  '/forgot_password': typeof ForgotpasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/reset_password': typeof ResetpasswordRoute
   '/404': typeof R404LazyRoute
   '/about': typeof AboutLazyRoute
   '/contact': typeof ContactLazyRoute
@@ -187,8 +217,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexLazyRoute
+  '/forgot_password': typeof ForgotpasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/reset_password': typeof ResetpasswordRoute
   '/404': typeof R404LazyRoute
   '/about': typeof AboutLazyRoute
   '/contact': typeof ContactLazyRoute
@@ -202,8 +234,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/forgot_password'
     | '/login'
     | '/register'
+    | '/reset_password'
     | '/404'
     | '/about'
     | '/contact'
@@ -214,8 +248,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/forgot_password'
     | '/login'
     | '/register'
+    | '/reset_password'
     | '/404'
     | '/about'
     | '/contact'
@@ -226,8 +262,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/forgot_password'
     | '/login'
     | '/register'
+    | '/reset_password'
     | '/404'
     | '/about'
     | '/contact'
@@ -240,8 +278,10 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
+  ForgotpasswordRoute: typeof ForgotpasswordRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  ResetpasswordRoute: typeof ResetpasswordRoute
   R404LazyRoute: typeof R404LazyRoute
   AboutLazyRoute: typeof AboutLazyRoute
   ContactLazyRoute: typeof ContactLazyRoute
@@ -253,8 +293,10 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
+  ForgotpasswordRoute: ForgotpasswordRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  ResetpasswordRoute: ResetpasswordRoute,
   R404LazyRoute: R404LazyRoute,
   AboutLazyRoute: AboutLazyRoute,
   ContactLazyRoute: ContactLazyRoute,
@@ -277,8 +319,10 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/forgot_password",
         "/login",
         "/register",
+        "/reset_password",
         "/404",
         "/about",
         "/contact",
@@ -291,11 +335,17 @@ export const routeTree = rootRoute
     "/": {
       "filePath": "index.lazy.tsx"
     },
+    "/forgot_password": {
+      "filePath": "forgot_password.tsx"
+    },
     "/login": {
       "filePath": "login.tsx"
     },
     "/register": {
       "filePath": "register.tsx"
+    },
+    "/reset_password": {
+      "filePath": "reset_password.tsx"
     },
     "/404": {
       "filePath": "404.lazy.tsx"

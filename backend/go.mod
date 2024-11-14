@@ -12,7 +12,10 @@ require (
 	github.com/lib/pq v1.10.9
 )
 
+require github.com/gorilla/websocket v1.5.3
+
 require (
+	github.com/coder/websocket v1.8.12
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect

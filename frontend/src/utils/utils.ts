@@ -21,3 +21,29 @@ export function timeAgo(dateStr: string) {
   if (interval > 1) return `${interval} minutes ago`;
   return "just now";
 }
+
+export function throttle<F extends (...args: any[]) => void>(
+  func: F,
+  wait: number,
+): (...args: Parameters<F>) => void {
+  let timeout: NodeJS.Timeout | null = null;
+  let lastExecuted = 0;
+
+  return function (...args: Parameters<F>) {
+    const now = Date.now();
+    const remainingTime = wait - (now - lastExecuted);
+
+    if (remainingTime <= 0 || remainingTime > wait) {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      func(...args);
+      lastExecuted = now;
+    } else if (!timeout) {
+      timeout = setTimeout(() => {
+        func(...args);
+        lastExecuted = Date.now();
+      }, remainingTime);
+    }
+  };
+}

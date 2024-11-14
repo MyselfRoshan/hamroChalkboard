@@ -9,7 +9,6 @@ import { HistoryProvider } from "src/hooks/useHistory";
 import { useWindowSize } from "src/hooks/useWindowSize";
 import { ROOM_URL } from "src/utils/constants";
 import { CanvasMode, CanvasSetting } from "types/canvas";
-
 export const Route = createFileRoute("/room/$roomId")({
   notFoundComponent: () => (
     <NotFound
@@ -19,7 +18,7 @@ export const Route = createFileRoute("/room/$roomId")({
   ),
   component: () => {
     const { roomId } = Route.useParams();
-    const { authFetch } = useAuth();
+    const { authFetch, user } = useAuth();
 
     const { isError, error, isPending, data } = useQuery({
       queryKey: ["roomexists", roomId],
@@ -58,12 +57,18 @@ export const Route = createFileRoute("/room/$roomId")({
     if (isPending) {
       return <Loading text={`Joining room ${roomId}`} />;
     }
+    // console.log(user?.username);
 
     return (
       <div className="grid">
         {/* <Component /> */}
         <HistoryProvider>
-          <Canvas boardId="board" settings={settings} size={size} />
+          <Canvas
+            boardId="board"
+            settings={settings}
+            size={size}
+            roomId={roomId}
+          />
         </HistoryProvider>
         {/* <CanvasT width={size.width} height={size.height} /> */}
         {/* <ColorPicker color={color} onChange={setColor} /> */}

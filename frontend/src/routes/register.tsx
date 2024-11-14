@@ -101,7 +101,7 @@ export default function Register() {
   };
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4 text-foreground">
-      <div className="flex w-full max-w-4xl flex-col overflow-hidden rounded-lg bg-register-image bg-contain shadow-xl md:flex-row">
+      <div className="flex w-full max-w-4xl flex-col overflow-hidden rounded-lg bg-register-image bg-right shadow-xl md:flex-row">
         {/* Right side - Background */}
         <div className="relative hidden w-full md:block md:w-1/2">
           <div className="absolute inset-0 grid place-items-center bg-primary/20 backdrop-blur-[1px]">

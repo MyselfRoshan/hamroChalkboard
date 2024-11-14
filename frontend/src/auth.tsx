@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(
     async ({ token, payload }: { token: string; payload: User }) => {
-      console.log(token, payload);
+      // console.log(token, payload);
       store(tokenKey, token);
       store(userKey, payload);
       setUser(payload);
@@ -148,7 +148,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             Authorization: `Bearer ${getFromStore(tokenKey)}`,
           },
         });
-        console.log(response);
+        // console.log(response);
         if (response.status === 200) {
           setUser(getFromStore(userKey));
         }

@@ -19,7 +19,6 @@ type SidebarProps = {
   setIsClosed: React.Dispatch<React.SetStateAction<boolean>>;
 };
 export default function Sidebar({ isClosed, setIsClosed }: SidebarProps) {
-  console.log(process.env.DB_HOST);
   const { user } = useAuth();
   const avatar = "/placeholder.svg?height=32&width=32";
 

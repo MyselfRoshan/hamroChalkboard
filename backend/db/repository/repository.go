@@ -8,6 +8,7 @@ import (
 type DBRepo interface {
 	UserRepository
 	RoomRepository
+	// SocketRepository
 }
 
 type postgresDBRepo struct {
