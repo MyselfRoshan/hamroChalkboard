@@ -850,8 +850,10 @@ import React, {
   useState,
   WheelEvent,
 } from "react";
+import useWebSocket, { ReadyState } from "react-use-websocket";
 import { toast } from "sonner";
 import { useHistoryContext } from "src/hooks/useHistory";
+import { renderCursors } from "src/hooks/usePerfectCursor";
 import { WindowSize } from "src/hooks/useWindowSize";
 import { CanvasMode, CanvasSetting, Point } from "types/canvas";
 import BurgerMenu from "./BurgerMenu";
@@ -860,6 +862,8 @@ import FlexibleButton from "./FlexibleButton";
 import Toolbar from "./Toolbar";
 let lastPath: Point[] = [];
 
+import { User } from "src/auth";
+import { throttle } from "src/utils/utils";
 import "./App.css";
 import { CustomCursor } from "./CustomCursor";
 
@@ -867,9 +871,10 @@ type CanvasProps = {
   boardId: string;
   settings: React.MutableRefObject<CanvasSetting>;
   size: WindowSize;
+  roomId: string;
 };
 
-export default function Canvas({ settings, size }: CanvasProps) {
+export default function Canvas({ settings, size, roomId }: CanvasProps) {
   const PAN_LIMIT = 7000;
   const width = Math.min(size.width, PAN_LIMIT);
   const height = Math.min(size.height, PAN_LIMIT);
@@ -898,6 +903,67 @@ export default function Canvas({ settings, size }: CanvasProps) {
     getHistory,
     getRedoHistory,
   } = useHistoryContext();
+
+  const SOCKET_URL = `ws://${location.hostname}:3333/api/v1/ws/${roomId}`;
+  const [messageHistory, setMessageHistory] = useState<MessageEvent<any>[]>([]);
+
+  const user: User | null = JSON.parse(localStorage.getItem("auth.user")!);
+  const {
+    sendMessage,
+    sendJsonMessage,
+    lastJsonMessage,
+    lastMessage,
+    readyState,
+  } = useWebSocket(SOCKET_URL, { queryParams: { username: user!.username } });
+
+  // useEffect(() => {
+  // if (lastMessage !== null) {
+  //   setMessageHistory((prev) => prev.concat(lastMessage));
+  // }
+  // // console.log(lastJsonMessage);
+  // if (
+  //   user &&
+  //   lastJsonMessage &&
+  //   lastJsonMessage[user.username] &&
+  //   lastJsonMessage[user!.username!].event !== "mousemove"
+  // ) {
+  //   setMessageHistory((prev) => prev.concat(lastJsonMessage));
+  //   if (lastJsonMessage[user!.username].event === "draw") {
+  //     console.log(lastJsonMessage[user!.username].state);
+  //     pushHistory(lastJsonMessage[user!.username].state);
+  //   }
+  // }
+  // }, [lastJsonMessage]);
+
+  // console.log(messageHistory);
+  const THROTTLE_INTERVAL = 100;
+  const sendJsonMessageThrottled = useRef(
+    throttle(sendJsonMessage, THROTTLE_INTERVAL),
+  );
+  useEffect(() => {
+    // sendJsonMessage({ x: 0, y: 0 });
+    window.addEventListener("mousemove", (event) => {
+      const cursor = {
+        x: event.clientX,
+        y: event.clientY,
+      };
+      sendJsonMessageThrottled.current({
+        event: "mousemove",
+        cursor,
+      });
+    });
+  });
+  const connectionStatus = {
+    [ReadyState.CONNECTING]: "Connecting",
+    [ReadyState.OPEN]: "Open",
+    [ReadyState.CLOSING]: "Closing",
+    [ReadyState.CLOSED]: "Closed",
+    [ReadyState.UNINSTANTIATED]: "Uninstantiated",
+  }[readyState];
+
+  // console.log(connectionStatus, lastMessage, lastJsonMessage);
+  // console.log(lastJsonMessage);
+  // renderCursors(lastJsonMessage);
 
   const prevent = (
     e: PointerEvent | Event | React.MouseEvent<HTMLButtonElement>,
@@ -930,9 +996,12 @@ export default function Canvas({ settings, size }: CanvasProps) {
     isDrawing.current = false;
     setDrawing(false);
     if (lastPath.length > 0) {
+      // pushHistory(lastJsonMessage.state);
+      // console.log(lastJsonMessage);
       pushHistory({ ...settings.current, path: lastPath });
       lastPath = [];
       drawCanvas(getContext());
+      console.log("hello");
     }
   };
 
@@ -1148,6 +1217,10 @@ export default function Canvas({ settings, size }: CanvasProps) {
       -(PAN_LIMIT - height) / 2,
     );
     drawCanvas(ctx);
+    // sendJsonMessage({
+    //   event: "draw",
+    //   state: getHistory().at(-1),
+    // });
     return () => {
       document.removeEventListener("pointerup", onPointerUp);
       document.removeEventListener("pointermove", onPointerMove);
@@ -1204,9 +1277,10 @@ export default function Canvas({ settings, size }: CanvasProps) {
   //   setZoom(newZoom)
   //   drawCanvas(ctx)
   // }
+  // console.log(location.hostname);
   /* TODO: FIX ZOOM along with PAN */
   const handleWheel = (e: WheelEvent<HTMLCanvasElement>) => {
-    e.preventDefault();
+    // e.preventDefault();
     const ctx = ctxRef.current!;
     if (!ctx) return;
 
@@ -1241,6 +1315,7 @@ export default function Canvas({ settings, size }: CanvasProps) {
   };
   return (
     <>
+      {lastJsonMessage && renderCursors(lastJsonMessage, user?.username)}
       <canvas
         ref={canvasRef}
         width={width}

@@ -16,7 +16,7 @@ import {
 } from "components/ui/dialog";
 import { LogOut } from "lucide-react";
 import { toast } from "sonner";
-import { DEAUTH_URL } from "src/utils/constants";
+import { AUTH_URL } from "src/utils/constants";
 
 type LogoutProps = {
   as?: "default" | "menu-item";
@@ -27,7 +27,7 @@ export default function Logout({ as = "default" }: LogoutProps) {
   const navigate = Route.useNavigate();
   const mutate = useMutation({
     mutationFn: async () => {
-      return authFetch(DEAUTH_URL, {
+      return authFetch(AUTH_URL, {
         method: "DELETE",
       });
     },

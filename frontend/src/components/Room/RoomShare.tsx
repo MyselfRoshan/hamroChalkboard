@@ -14,8 +14,9 @@ import { toast } from "sonner";
 
 type RoomShareProps = {
   roomId: number;
+  roomName: string;
 };
-export default function RoomShare({ roomId }: RoomShareProps) {
+export default function RoomShare({ roomId, roomName }: RoomShareProps) {
   const shareLink = `${window.location.origin}/room/${roomId}`;
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(
@@ -36,21 +37,16 @@ export default function RoomShare({ roomId }: RoomShareProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Share Room</DialogTitle>
+          <DialogTitle>
+            Share Room <span className="text-white">"{roomName}"</span>
+          </DialogTitle>
           <DialogDescription>
             Share this link or QR code to invite others to the room.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col items-center space-y-4">
           <div className="rounded-lg bg-white p-4">
-            <QRCode
-              value={shareLink}
-              //   title="Hello"
-              //   fgColor="#a16207"
-              //   fgColor="#ca8a04"
-              level="H"
-              size="200"
-            />
+            <QRCode value={shareLink} level="H" size={200} />
           </div>
           <Input value={shareLink} readOnly className="w-full" />
           <Button onClick={() => copyToClipboard(shareLink)} className="w-full">

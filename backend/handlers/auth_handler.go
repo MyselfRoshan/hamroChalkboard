@@ -50,25 +50,80 @@ func (r *Repository) HandlePostToken(c echo.Context) error {
 // Returns:
 //
 //	error: an error response if the token is expired, invalid, or cannot be refreshed.
+// func (r *Repository) JWTErrorHandler(c echo.Context, err error) error {
+// 	if errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenInvalidClaims) {
+// 		username := c.QueryParam("username")
+// 		user, err := r.DB.GetUserByUsername(username)
+// 		log.Println(user, err, username)
+// 		if err != nil {
+// 			// Delete refresh token and logout user
+// 			log.Println("error while authenticating ", err)
+// 			r.DB.UpdateUserRefreshToken(username, "")
+// 			return c.JSON(http.StatusUnauthorized, echo.Map{
+// 				"error": "Error while authenticating.",
+// 			})
+// 		}
+// 		if !helpers.IsValidToken(user.RefreshToken, r.Config.JWT_SECRET) {
+// 			// Delete refresh token and logout user
+// 			log.Println("refresh token expired or invalid")
+// 			r.DB.UpdateUserRefreshToken(username, "")
+// 			return c.JSON(http.StatusUnauthorized, echo.Map{
+// 				"error": "Your session has expired or is invalid. ",
+// 			})
+// 		}
+
+// 		// Generate new access token
+// 		accessToken, accessPayload, err := user.NewUserToken(r.Config.JWT_SECRET, r.Config.JWT_EXP)
+// 		if err != nil {
+// 			log.Println("could not generate access token", err)
+// 			return c.JSON(http.StatusInternalServerError, echo.Map{
+// 				"error": "error while authenticating.",
+// 			})
+// 		}
+
+// 		log.Println("refreshed token", accessToken)
+// 		return c.JSON(http.StatusCreated, echo.Map{
+// 			"token":   accessToken,
+// 			"payload": accessPayload,
+// 		})
+// 	}
+// 	return nil
+// }
+
 func (r *Repository) JWTErrorHandler(c echo.Context, err error) error {
 	if errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenInvalidClaims) {
 		username := c.QueryParam("username")
+
+		if r.DB == nil {
+			log.Println("Database connection is nil")
+			return c.JSON(http.StatusInternalServerError, echo.Map{
+				"error": "Internal server error.",
+			})
+		}
+
 		user, err := r.DB.GetUserByUsername(username)
 		log.Println(user, err, username)
+
 		if err != nil {
-			// Delete refresh token and logout user
 			log.Println("error while authenticating ", err)
 			r.DB.UpdateUserRefreshToken(username, "")
 			return c.JSON(http.StatusUnauthorized, echo.Map{
 				"error": "Error while authenticating.",
 			})
 		}
-		if !helpers.IsValidToken(user.RefreshToken, r.Config.JWT_SECRET) {
-			// Delete refresh token and logout user
-			log.Println("refresh token expired or invalid")
+
+		if user == nil {
+			log.Println("User not found for username:", username)
+			return c.JSON(http.StatusUnauthorized, echo.Map{
+				"error": "User not found.",
+			})
+		}
+
+		if user.RefreshToken == "" {
+			log.Println("Refresh token is empty for user:", username)
 			r.DB.UpdateUserRefreshToken(username, "")
 			return c.JSON(http.StatusUnauthorized, echo.Map{
-				"error": "Your session has expired or is invalid. ",
+				"error": "Your session has expired or is invalid.",
 			})
 		}
 
