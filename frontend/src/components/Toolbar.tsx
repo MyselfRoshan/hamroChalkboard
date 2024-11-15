@@ -83,8 +83,8 @@ export default function Toolbar({
 
     return (
         <>
-            <div className="absolute top-[50%] right-2 bg-white rounded-md p-1.5 grid gap-y-1 items-center shadow-md">
-                {modeButtons.map(btn => (
+            <div className="absolute right-2 top-[50%] grid items-center gap-y-1 rounded-md bg-white p-1.5 shadow-md">
+                {modeButtons.map((btn) => (
                     <FlexibleButton
                         key={btn.mode}
                         label={btn.label}
@@ -94,7 +94,7 @@ export default function Toolbar({
                     />
                 ))}
             </div>
-            <div className="absolute bottom-2 right-2 bg-white rounded-md p-1.5 flex gap-1 shadow-md">
+            <div className="absolute bottom-2 right-2 flex gap-1 rounded-md bg-white p-1.5 shadow-md">
                 <FlexibleButton
                     label="Undo"
                     side="top"

@@ -1,11 +1,11 @@
-import React from "react";
+import React from "react"
 
 type ErrorMessageProps = {
-  message: string;
-};
+    message: string
+}
 
 const ErrorMessage: React.FC<ErrorMessageProps> = ({ message }) => {
-  return <span className="text-red-900">{message}</span>;
-};
+    return <span className="text-red-900">{message}</span>
+}
 
-export default ErrorMessage;
+export default ErrorMessage
