@@ -133,7 +133,7 @@ export default function CanvasT({ ...props }: CanvasProps) {
                 scale,
             )
             context.translate(offsetDiff[0], offsetDiff[1])
-            setViewportTopLeft(prevVal => diffPoints(prevVal, offsetDiff))
+            setViewportTopLeft((prevVal) => diffPoints(prevVal, offsetDiff))
             isResetRef.current = false
         }
     }, [context, offset, scale])

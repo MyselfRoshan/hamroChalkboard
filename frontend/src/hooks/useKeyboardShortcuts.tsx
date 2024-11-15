@@ -22,7 +22,7 @@ const useKeyboardShortcuts = (shortcuts: Shortcuts) => {
                 const isKeyMatch = event.key.toLowerCase() === key.toLowerCase()
                 const areModifiersMatch = (modifiers || "")
                     .split(",")
-                    .every(modifier => {
+                    .every((modifier) => {
                         switch (modifier.trim()) {
                             case "ctrl":
                                 return event.ctrlKey
@@ -57,7 +57,7 @@ const useKeyboardShortcuts = (shortcuts: Shortcuts) => {
 
         return () => {
             // Unregister shortcuts
-            Object.keys(shortcuts).forEach(keyCombination => {
+            Object.keys(shortcuts).forEach((keyCombination) => {
                 activeShortcuts.delete(keyCombination)
             })
             window.removeEventListener("keydown", handleKeyDown)

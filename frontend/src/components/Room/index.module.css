@@ -1,70 +1,70 @@
 .avatarList {
-  --avatar-size: 3rem;
-  --avatar-count: 4;
+    --avatar-size: 3rem;
+    --avatar-count: 4;
 
-  display: grid;
-  /* Default to displaying most of the avatar to
+    display: grid;
+    /* Default to displaying most of the avatar to
     enable easier access on touch devices, ensuring
     the WCAG touch target size is met or exceeded */
-  grid-template-columns: repeat(
-    var(--avatar-count),
-    max(44px, calc(var(--avatar-size) / 1.15))
-  );
-  /* `padding` matches added visual dimensions of
+    grid-template-columns: repeat(
+        var(--avatar-count),
+        max(44px, calc(var(--avatar-size) / 1.15))
+    );
+    /* `padding` matches added visual dimensions of
     the `box-shadow` to help create a more accurate
     computed component size */
-  padding: 1rem 0.08em;
-  font-size: var(--avatar-size);
+    padding: 1rem 0.08em;
+    font-size: var(--avatar-size);
 }
 
 @media (any-hover: hover) and (any-pointer: fine) {
-  .avatarList {
-    /* We create 1 extra cell to enable the computed
+    .avatarList {
+        /* We create 1 extra cell to enable the computed
       width to match the final visual width */
-    grid-template-columns: repeat(
-      calc(var(--avatar-count) + 1),
-      calc(var(--avatar-size) / 1.75)
-    );
-  }
+        grid-template-columns: repeat(
+            calc(var(--avatar-count) + 1),
+            calc(var(--avatar-size) / 1.75)
+        );
+    }
 }
 
 .avatarList .avatar {
-  width: var(--avatar-size);
-  height: var(--avatar-size);
+    width: var(--avatar-size);
+    height: var(--avatar-size);
 }
 
 .avatarList .avatar:hover ~ .avatar .avatarLink,
 .avatarList .avatar:focus-within ~ .avatar .avatarLink {
-  transform: translateX(33%);
+    transform: translateX(33%);
 }
 
 .avatarList .avatarImg,
 .avatarList .avatarLink {
-  display: block;
-  border-radius: 50%;
-  width: 100%;
-  height: 100%;
+    display: block;
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
 }
 
 .avatarList .avatarLink {
-  transition: transform 180ms ease-in-out;
+    transition: transform 180ms ease-in-out;
 }
 
 .avatarList .avatarImg {
-  /* width: var(--avatar-size);
+    /* width: var(--avatar-size);
   height: var(--avatar-size); */
-  aspect-ratio: 1;
-  object-fit: cover;
-  background-color: #fff;
-  box-shadow:
-    0 0 0 0.05em #fff,
-    0 0 0 0.08em rgba(0, 0, 0, 0.15);
+    aspect-ratio: 1;
+    object-fit: cover;
+    background-color: #fff;
+    box-shadow:
+        0 0 0 0.05em #fff,
+        0 0 0 0.08em rgba(0, 0, 0, 0.15);
 }
 
 .avatarList .avatarLink:focus {
-  outline: 2px solid transparent;
-  /* Double-layer trick to work for dark and light backgrounds */
-  box-shadow:
-    0 0 0 0.08em #29344b,
-    0 0 0 0.12em white;
+    outline: 2px solid transparent;
+    /* Double-layer trick to work for dark and light backgrounds */
+    box-shadow:
+        0 0 0 0.08em #29344b,
+        0 0 0 0.12em white;
 }

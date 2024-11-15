@@ -1,31 +1,31 @@
-import path from "path";
+import path from "path"
 
 module.exports = {
-  module: {
-    rules: [
-      {
-        test: /\.css$/,
-        use: [
-          {
-            loader: "postcss-loader",
-            options: {
-              postcssOptions: {
-                plugins: {
-                  tailwindcss: {},
-                  autoprefixer: {},
-                },
-              },
+    module: {
+        rules: [
+            {
+                test: /\.css$/,
+                use: [
+                    {
+                        loader: "postcss-loader",
+                        options: {
+                            postcssOptions: {
+                                plugins: {
+                                    tailwindcss: {},
+                                    autoprefixer: {},
+                                },
+                            },
+                        },
+                    },
+                ],
+                type: "css",
             },
-          },
         ],
-        type: "css",
-      },
-    ],
-  },
-  resolve: {
-    tsConfig: {
-      configFile: path.resolve(__dirname, "./tsconfig.json"),
-      references: "auto",
     },
-  },
-};
+    resolve: {
+        tsConfig: {
+            configFile: path.resolve(__dirname, "./tsconfig.json"),
+            references: "auto",
+        },
+    },
+}
