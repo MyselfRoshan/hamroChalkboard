@@ -9,6 +9,7 @@ import {
     Redo2,
     Square,
     Undo2,
+    RotateCcw,
 } from "lucide-react"
 import useKeyboardShortcuts from "src/hooks/useKeyboardShortcuts"
 import FlexibleButton from "./FlexibleButton"
@@ -18,6 +19,7 @@ type ToolbarProps = {
     // setCanvasState: (newState: CanvasState) => void
     canvasMode: CanvasMode
     setCanvasMode: (mode: CanvasMode) => void
+    clearAll: (e: React.MouseEvent<HTMLButtonElement> | KeyboardEvent) => void
     undo: (e: React.MouseEvent<HTMLButtonElement> | KeyboardEvent) => void
     redo: (e: React.MouseEvent<HTMLButtonElement> | KeyboardEvent) => void
     canUndo: boolean
@@ -34,6 +36,7 @@ type ToolbarProps = {
 export default function Toolbar({
     canvasMode,
     setCanvasMode,
+    clearAll,
     undo,
     redo,
     canUndo,
@@ -95,6 +98,14 @@ export default function Toolbar({
                 ))}
             </div>
             <div className="absolute bottom-2 right-2 flex gap-1 rounded-md bg-white p-1.5 shadow-md">
+                <FlexibleButton
+                    label="Clear All"
+                    side="top"
+                    icon={RotateCcw}
+                    isActive={false}
+                    onClick={clearAll}
+                    isDisabled={canUndo}
+                />
                 <FlexibleButton
                     label="Undo"
                     side="top"

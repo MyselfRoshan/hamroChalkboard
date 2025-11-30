@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/(auth)/dashboard")({
     beforeLoad: ({ context, location }) => {
@@ -16,9 +16,18 @@ export const Route = createFileRoute("/(auth)/dashboard")({
 })
 
 import { Button } from "components/ui/button"
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "components/ui/card"
+import { Input } from "components/ui/input"
 import { cn } from "lib/utils"
-import { LayoutGrid, List } from "lucide-react"
-import { useState } from "react"
+import { ArrowRight, LayoutGrid, List } from "lucide-react"
+import { useRef, useState } from "react"
+import { toast } from "sonner"
 import { useAuth } from "src/auth"
 import { Room } from "src/components/Room"
 import RoomCreate from "src/components/Room/RoomCreate"
@@ -119,11 +128,16 @@ const mockRooms = [
     },
 ]
 
+const UUID_REGEX =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 export default function DashboardPage() {
     const [rooms, setRooms] = useState(mockRooms)
 
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
     const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false)
+    const navigate = useNavigate()
+
+    const joinRoomRef = useRef<HTMLInputElement>(null)
 
     const participatingRooms = rooms.filter(
         (room) =>
@@ -142,6 +156,25 @@ export default function DashboardPage() {
     })
     const rms = query.data
 
+    const handleJoinRoom = (e: React.FormEvent) => {
+        e.preventDefault()
+        console.log(joinRoomRef.current?.value)
+
+        const joinRoomCode = joinRoomRef.current?.value as string
+        if (!joinRoomCode.trim()) {
+            toast.error("Room code is required")
+            return
+        }
+
+        if (!UUID_REGEX.test(joinRoomCode)) {
+            toast.error("Invalid room code format")
+            return
+        }
+        navigate({ to: `/room/${joinRoomRef.current?.value}` })
+        // if (joinRoomCode.trim()) {
+        //     joinRoomMutation.mutate(joinRoomCode)
+        // }
+    }
     return (
         <div
             className={cn(
@@ -160,7 +193,28 @@ export default function DashboardPage() {
                         Hamro Chalkboard
                     </h1>
                     <RoomCreate />
-
+                    <Card className="border-primary/20 bg-card/30">
+                        <CardHeader>
+                            <CardTitle>Join a New Room</CardTitle>
+                            <CardDescription>
+                                Start joining room by entering room code
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex gap-2">
+                            <Input
+                                type="text"
+                                placeholder="Enter room code"
+                                ref={joinRoomRef}
+                                // value={joinRoomCode}
+                                // onChange={(e) => setJoinRoomCode(e.target.value)}
+                                className="flex-grow"
+                            />
+                            <Button onClick={handleJoinRoom}>
+                                {/* {joinRoomMutation.isPending ? "Joining..." : "Join Room"} */}
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                        </CardContent>
+                    </Card>
                     <div className="flex items-center justify-between">
                         <h2 className="text-2xl font-bold">Your Rooms</h2>
                         <div className="flex space-x-2">
