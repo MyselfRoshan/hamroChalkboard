@@ -22,6 +22,7 @@ import { Input } from "components/ui/input"
 import { useSocketCanvas } from "src/hooks/useSocketCanvas"
 import "./App.css"
 import { DrawModeCursor } from "./Cursors/DrawModeCursor"
+import { rdp } from "src/utils/rdp"
 
 type CanvasProps = {
     settings: React.MutableRefObject<CanvasSetting>
@@ -46,6 +47,7 @@ export default function Canvas({ settings, size, roomId }: CanvasProps) {
 
     // Zoom state
     const [zoom, setZoom] = useState<number>(1)
+    const [rdpStats, setRdpStats] = useState({ original: 0, reduced: 0 })
     const MIN_ZOOM = 0.5
     const MAX_ZOOM = 5
     const ZOOM_FACTOR = 10
@@ -55,6 +57,7 @@ export default function Canvas({ settings, size, roomId }: CanvasProps) {
         pushHistory,
         popHistory,
         redoHistory,
+        clearAllHistory,
         getHistory,
         getRedoHistory,
     } = useHistoryContext()
@@ -137,10 +140,22 @@ export default function Canvas({ settings, size, roomId }: CanvasProps) {
         isDrawing.current = false
         setDrawing(false)
         if (lastPath.length > 0) {
-            pushHistory({ ...settings.current, path: lastPath })
+            const epsilon = settings.current.rdpEpsilon
+
+            const originalLength = lastPath.length
+            const pathToSend = epsilon > 0 ? rdp(lastPath, epsilon) : lastPath
+            const reducedLength = pathToSend.length
+            setRdpStats({
+                original: originalLength,
+                reduced: reducedLength,
+            })
+            // pushHistory({ ...settings.current, path: lastPath })
+            pushHistory({ ...settings.current, path: pathToSend })
+
+            console.log(lastPath, pathToSend)
             sendJsonMessage({
                 event: "draw",
-                state: { ...settings.current, path: lastPath },
+                state: { ...settings.current, path: pathToSend },
             })
             lastPath = []
             drawCanvas(getContext())
@@ -333,6 +348,18 @@ export default function Canvas({ settings, size, roomId }: CanvasProps) {
         render()
     }
 
+    const clearAllCanvas = (
+        e: React.MouseEvent<HTMLButtonElement> | KeyboardEvent,
+    ) => {
+        if (e instanceof MouseEvent) {
+            prevent(e)
+        }
+        if (getHistory().length === 0) return
+        clearAllHistory()
+        drawCanvas(getContext())
+        render()
+    }
+
     const redoCanvas = (
         e: React.MouseEvent<HTMLButtonElement> | KeyboardEvent,
     ) => {
@@ -498,13 +525,18 @@ export default function Canvas({ settings, size, roomId }: CanvasProps) {
                 setCanvasMode={setMode}
                 canRedo={getRedoHistory().length === 0}
                 canUndo={getHistory().length === 0}
+                clearAll={clearAllCanvas}
                 undo={undoCanvas}
                 redo={redoCanvas}
             />
 
             {settings.current.mode !== CanvasMode.Pan &&
                 settings.current.mode !== CanvasMode.None && (
-                    <CustomizationBar settings={settings} />
+                    <CustomizationBar
+                        settings={settings}
+                        originalPoints={rdpStats.original}
+                        reducedPoints={rdpStats.reduced}
+                    />
                 )}
             <BurgerMenu openFile={() => importInput.current?.click()}>
                 <div>

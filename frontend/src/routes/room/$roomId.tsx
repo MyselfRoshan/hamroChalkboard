@@ -48,6 +48,7 @@ export const Route = createFileRoute("/room/$roomId")({
             stroke: 6,
             color: "#000",
             mode: CanvasMode.None,
+            rdpEpsilon: 5
         })
 
         if (isError) {

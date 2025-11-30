@@ -17,7 +17,8 @@ type RoomShareProps = {
     roomName: string
 }
 export default function RoomShare({ roomId, roomName }: RoomShareProps) {
-    const shareLink = `${window.location.origin}/room/${roomId}`
+    // const shareLink = `${window.location.origin}/room/${roomId}`
+    const shareLink = roomId
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text).then(
             () => {
