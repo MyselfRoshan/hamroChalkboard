@@ -19,7 +19,9 @@ func Routes(cfg *config.AppConfig) *echo.Echo {
 	mux.Use(middleware.Logger())
 	mux.Use(middleware.Recover())
 	mux.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:3000", "ws://localhost:3000", "*"},
+		// AllowOrigins:     []string{"http://localhost:3000", "ws://localhost:3000", "*"},
+		// AllowOrigins:     []string{"http://*", "ws://localhost:3000", "http://*"},
+		AllowOrigins:     []string{"http://*", "ws://localhost:3000", "http://*","ws://*","ws://localhost:3000"},
 		AllowHeaders:     []string{echo.HeaderAccept, echo.HeaderContentType, echo.HeaderAuthorization, echo.HeaderXCSRFToken, echo.HeaderSetCookie, echo.HeaderCookie, echo.HeaderOrigin},
 		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete, http.MethodOptions, http.MethodHead},
 		AllowCredentials: true,

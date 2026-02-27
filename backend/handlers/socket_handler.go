@@ -13,7 +13,7 @@ var (
 	upgrader = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			origin := r.Header.Get("Origin")
-			return origin == "http://localhost:3000" || origin == "http://192.168.30.210:3000"
+			return origin == "http://localhost:3000" || origin == "http://192.168.10.181:3000"
 		},
 	}
 )
