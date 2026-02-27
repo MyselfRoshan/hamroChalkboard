@@ -13,7 +13,7 @@
 *.a
 
 # Ignoring .env file if used for environment variables
-.env
+*.env
 
 # MacOS specific
 .DS_Store
