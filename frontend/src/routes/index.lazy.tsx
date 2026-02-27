@@ -15,8 +15,7 @@ function LandingPage() {
     const { isAuthenticated } = useAuth()
     useEffect(() => {
         const handleScroll = () => setScrollY(window.scrollY)
-        window.addEventListener("scroll", handleScroll)
-        3
+        window.addEventListener("scroll", handleScroll, { passive: true })
         return () => window.removeEventListener("scroll", handleScroll)
     }, [])
 

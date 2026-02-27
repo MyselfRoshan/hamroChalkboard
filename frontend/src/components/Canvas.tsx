@@ -11,7 +11,7 @@ import { toast } from "sonner"
 import { useHistoryContext } from "src/hooks/useHistory"
 import { renderCursors } from "src/hooks/usePerfectCursor"
 import { WindowSize } from "src/hooks/useWindowSize"
-import { CanvasMode, CanvasSetting, Point } from "types/canvas"
+import { CanvasMode, CanvasSetting, History, Point } from "types/canvas"
 import BurgerMenu from "./BurgerMenu"
 import { CustomizationBar } from "./CustomizationBar"
 import FlexibleButton from "./FlexibleButton"
@@ -145,17 +145,25 @@ export default function Canvas({ settings, size, roomId }: CanvasProps) {
             const originalLength = lastPath.length
             const pathToSend = epsilon > 0 ? rdp(lastPath, epsilon) : lastPath
             const reducedLength = pathToSend.length
+            const currentTimestamp = new Date()
             setRdpStats({
                 original: originalLength,
                 reduced: reducedLength,
             })
             // pushHistory({ ...settings.current, path: lastPath })
-            pushHistory({ ...settings.current, path: pathToSend })
+            const newHistoryNode: History = {
+                ...settings.current,
+                path: pathToSend,
+                username,
+                createdAt: currentTimestamp,
+            }
+
+            pushHistory(newHistoryNode)
 
             console.log(lastPath, pathToSend)
             sendJsonMessage({
                 event: "draw",
-                state: { ...settings.current, path: pathToSend },
+                state: newHistoryNode,
             })
             lastPath = []
             drawCanvas(getContext())
@@ -497,7 +505,7 @@ export default function Canvas({ settings, size, roomId }: CanvasProps) {
         getContext,
         drawCanvas,
     })
-    console.log("lastJsonMessage", lastJsonMessage)
+    console.log("lastJsonMessage", lastJsonMessage, sendJsonMessage)
     return (
         <>
             {lastJsonMessage && renderCursors(lastJsonMessage, username)}
@@ -538,7 +546,10 @@ export default function Canvas({ settings, size, roomId }: CanvasProps) {
                         reducedPoints={rdpStats.reduced}
                     />
                 )}
-            <BurgerMenu openFile={() => importInput.current?.click()}>
+            <BurgerMenu
+                openFile={() => importInput.current?.click()}
+                roomId={roomId}
+            >
                 <div>
                     <Input
                         ref={importInput}

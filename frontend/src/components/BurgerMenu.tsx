@@ -1,4 +1,4 @@
-import { Download, Folder, Keyboard, Settings } from "lucide-react"
+import { Download, Folder, Keyboard, Settings, User } from "lucide-react"
 
 import {
     DropdownMenu,
@@ -11,16 +11,19 @@ import {
 import { useRef, useState } from "react"
 import useKeyboardShortcuts from "src/hooks/useKeyboardShortcuts"
 import { FileDownloader } from "./FileDownload"
+import { HistorySheet } from "./Historysheet"
 
 export type DropdownMenuProps = {
     children: React.ReactNode
     // downloadFile: () => void
     // downloadableJSON: () => History[]
     openFile: () => void
+    roomId: string
 }
 export default function BurgerMenu({
     children,
     openFile,
+    roomId,
     // downloadFile,
     // downloadableJSON,
 }: DropdownMenuProps) {
@@ -33,6 +36,8 @@ export default function BurgerMenu({
     const fileDownloaderRef = useRef<any>(null)
 
     const [openFileDownloader, setOpenFileDownloader] = useState(false)
+    const [openHistorySheet, setOpenHistorySheet] = useState(false) // State for HistorySheet
+
     return (
         <>
             <div className="absolute right-4 top-4 rounded-md bg-white p-1.5 shadow-md">
@@ -65,6 +70,13 @@ export default function BurgerMenu({
                                 <DropdownMenuShortcut>
                                     Ctrl+S
                                 </DropdownMenuShortcut>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onSelect={() => setOpenHistorySheet(true)}
+                            >
+                                <User className="mr-2 h-4 w-4" />
+                                <span>User Logs</span>
+                                {/* <DropdownMenuShortcut>⌘S</DropdownMenuShortcut> */}
                             </DropdownMenuItem>
                             <DropdownMenuItem>
                                 <Settings className="mr-2 h-4 w-4" />
@@ -133,7 +145,13 @@ export default function BurgerMenu({
             <FileDownloader
                 isOpen={openFileDownloader}
                 setIsOpen={setOpenFileDownloader}
-            ></FileDownloader>
+            />
+            {/* <HistorySheet roomId={roomId} /> */}
+            <HistorySheet
+                roomId={roomId}
+                open={openHistorySheet}
+                onOpenChange={setOpenHistorySheet}
+            />
         </>
     )
 }

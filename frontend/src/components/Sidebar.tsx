@@ -58,11 +58,11 @@ export default function Sidebar({ isClosed, setIsClosed }: SidebarProps) {
                     isClosed && "items-center",
                 )}
             >
-                {menuItems.map((item, index) => (
+                {menuItems.map((item) => (
                     <Link to={item.to}>
                         <FlexibleButton
                             className="ease transition-all duration-300"
-                            key={index}
+                            key={item.label}
                             label={item.label}
                             icon={item.icon}
                             onClick={item.onClick}

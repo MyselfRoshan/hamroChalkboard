@@ -186,7 +186,9 @@ export default function CanvasT({ ...props }: CanvasProps) {
         }
 
         canvasElem.addEventListener("mousemove", handleUpdateMouse)
-        canvasElem.addEventListener("wheel", handleUpdateMouse)
+        canvasElem.addEventListener("wheel", handleUpdateMouse, {
+            passive: true,
+        })
         return () => {
             canvasElem.removeEventListener("mousemove", handleUpdateMouse)
             canvasElem.removeEventListener("wheel", handleUpdateMouse)

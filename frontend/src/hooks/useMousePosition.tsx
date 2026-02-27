@@ -33,7 +33,9 @@ const useMousePosition = ({
         window.addEventListener("mousemove", mousePositionHandler)
 
         if (touch) {
-            window.addEventListener("touchmove", mousePositionHandler)
+            window.addEventListener("touchmove", mousePositionHandler, {
+                passive: true,
+            })
         }
 
         return () => {

@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react"
 import useWebSocket, { ReadyState } from "react-use-websocket"
 import { User } from "src/auth"
 import { throttle } from "src/utils/utils"
-import { CanvasSetting, Point } from "types/canvas"
+import { CanvasSetting, History, Point } from "types/canvas"
 
 type WebSocketMessage = {
     event: string
@@ -12,7 +12,7 @@ type WebSocketMessage = {
 
 type UseWebSocketCanvasProps = {
     socketURL: string
-    pushHistory: (state: CanvasSetting & { path: Point[] }) => void
+    pushHistory: (newHistory: History) => void
     getContext: (state?: CanvasSetting) => CanvasRenderingContext2D
     drawCanvas: (ctx: CanvasRenderingContext2D) => void
 }
@@ -43,7 +43,11 @@ export const useSocketCanvas = ({
         if (!lastJsonMessage) return
         Object.keys(lastJsonMessage).forEach((u) => {
             if (username !== u && lastJsonMessage[u].event === "draw") {
-                console.log(lastJsonMessage[u].state)
+                console.log(
+                    lastJsonMessage[u].state,
+                    "last",
+                    lastJsonMessage[u],
+                )
                 pushHistory(lastJsonMessage[u].state)
                 getContext(lastJsonMessage[u].state)
                 drawCanvas(getContext())

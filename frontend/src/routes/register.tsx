@@ -57,10 +57,11 @@ export default function Register() {
         onSuccess: async (data) => {
             if (data.status === 200) {
                 toast.success("Registered successfully")
-                await router.invalidate()
-
-                await sleep(1)
-                await router.navigate({ to: "/login" })
+                Promise.all([
+                    await router.invalidate(),
+                    await sleep(1),
+                    await router.navigate({ to: "/login" }),
+                ])
             }
             if (data.status === 400) {
                 toast.error("Failed to register user")
@@ -227,32 +228,6 @@ export default function Register() {
                                             )}
                                         </span>
                                     </div>
-                                </div>
-                                <div className="flex gap-x-2">
-                                    <Checkbox
-                                        id="remember"
-                                        name="remember"
-                                        className="mt-1"
-                                    />
-                                    <Label
-                                        className="text-sm text-white"
-                                        htmlFor="terms"
-                                    >
-                                        I agree to the{" "}
-                                        <a
-                                            href="#"
-                                            className="text-primary hover:underline"
-                                        >
-                                            Terms of Service
-                                        </a>{" "}
-                                        and{" "}
-                                        <a
-                                            href="#"
-                                            className="text-primary hover:underline"
-                                        >
-                                            Privacy Policy
-                                        </a>
-                                    </Label>
                                 </div>
                             </CardContent>
                             <CardFooter>

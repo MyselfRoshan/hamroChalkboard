@@ -50,7 +50,7 @@ function store(key: string, value: string | User | null) {
 const getFromStore = (key: string) => JSON.parse(localStorage.getItem(key)!)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState<User | null>(getFromStore(userKey))
+    const [user, setUser] = useState<User | null>(() => getFromStore(userKey))
     let isAuthenticated = !!user
 
     const login = useCallback(
